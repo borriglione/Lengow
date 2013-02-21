@@ -1,0 +1,309 @@
+<?xml version="1.0"?>
+<config>
+	<modules>
+		<Profileolabs_Lengow>
+			<version>1.5.5</version>
+		</Profileolabs_Lengow>
+	</modules>
+	<admin>
+        <routers>
+			<lengow>
+				<use>admin</use>
+				<args>
+					<module>Profileolabs_Lengow</module>
+					<frontName>lengow</frontName>
+				</args>
+			</lengow>
+        </routers>
+    </admin>
+	<global>
+		<fieldsets>
+			<lengow_convert_customer>
+				<LastName><to_customer>lastname</to_customer><to_customer_address>lastname</to_customer_address></LastName>
+				<FirstName><to_customer>firstname</to_customer><to_customer_address>firstname</to_customer_address></FirstName>
+				<Email><to_customer>email</to_customer><to_customer_address>email</to_customer_address></Email>
+				<Phone><to_customer_address>telephone</to_customer_address></Phone>
+				<Street><to_customer_address>street_full</to_customer_address></Street>
+				<PostalCode><to_customer_address>postcode</to_customer_address></PostalCode>
+				<Town><to_customer_address>city</to_customer_address></Town>
+				<Country><to_customer_address>country_id</to_customer_address></Country>
+			</lengow_convert_customer>
+		</fieldsets>
+		<blocks>
+			<profileolabs_lengow>
+				<class>Profileolabs_Lengow_Block</class>
+			</profileolabs_lengow>
+		</blocks>
+		<helpers>
+			<profileolabs_lengow>
+				<class>Profileolabs_Lengow_Helper</class>
+			</profileolabs_lengow>
+		</helpers>
+		<models>
+			<profileolabs_lengow>
+				<class>Profileolabs_Lengow_Model</class>
+				<resourceModel>profileolabs_lengow_mysql4</resourceModel>
+			</profileolabs_lengow>		
+			<profileolabs_lengow_mysql4>
+				<class>Profileolabs_Lengow_Model_Mysql4</class>
+				<entities>
+					<manageorders_log>
+						<table>lengow_log</table>
+					</manageorders_log>
+				</entities>
+			</profileolabs_lengow_mysql4>
+			<catalog>
+				<rewrite>
+					<config>Profileolabs_Lengow_Model_Export_Rewrite_Catalog_Config</config>
+				</rewrite>
+			</catalog>
+		</models>
+		<resources>
+            <profileolabs_lengow_setup>
+                <setup>
+                    <module>Profileolabs_Lengow</module>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </profileolabs_lengow_setup>
+            <profileolabs_lengow_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </profileolabs_lengow_write>
+            <profileolabs_lengow_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </profileolabs_lengow_read>
+        </resources>
+        <events>
+	        <customer_group_load_after>
+	              <observers>
+	                  <lengow_quote_observer>
+	                      <class>Profileolabs_Lengow_Model_Manageorders_Observer</class>
+	                      <method>setCustomerTaxClassId</method>
+	                  </lengow_quote_observer>
+	              </observers>
+	          </customer_group_load_after>
+	          <sales_order_shipment_save_after>
+	          	<observers>
+	          		<lengow_shipment_save_after>
+	          			<class>Profileolabs_Lengow_Model_Manageorders_Observer</class>
+	                    <method>sendStatusShipped</method>
+	          		</lengow_shipment_save_after>
+	          	</observers>
+	          </sales_order_shipment_save_after>
+        </events>
+	</global>
+	<frontend>
+		<routers>
+			<lengow>
+				<use>standard</use>
+				<args>
+					<module>Profileolabs_Lengow</module>
+					<frontName>lengow</frontName>
+				</args>
+			</lengow>
+        </routers>
+		<layout>
+			<updates>
+				<lengow>
+					<file>profileolabs_lengow.xml</file>
+				</lengow>
+			</updates>
+		</layout>
+	</frontend>
+	<adminhtml>
+		<layout>
+			<updates>
+				<lengow>
+					<file>profileolabs_lengow.xml</file>
+				</lengow>
+			</updates>
+		</layout>
+		<translate>
+			<modules>
+				<Profileolabs_Lengow>
+					<files>
+						<default>Profileolabs_Lengow.csv</default>
+					</files>
+				</Profileolabs_Lengow>
+			</modules>
+		</translate>
+		<menu>
+		<lengow>
+		    <title>Lengow</title>
+            <sort_order>20</sort_order>
+            <depends><module>Profileolabs_Lengow</module></depends>
+            <children>
+            	<manageorders translate="title" module="profileolabs_lengow">
+            		<title>Commandes</title>
+                    <sort_order>200</sort_order>
+                    <children>
+                    	<order translate="title" module="profileolabs_lengow">
+                    		<title>Lengow orders</title>
+                    		<action>lengow/manageorders_adminhtml_order</action>
+                    		<sort_order>10</sort_order>
+                    	</order>
+                    	<import translate="title" module="profileolabs_lengow">
+                    		<title>Lengow import orders</title>
+                    		<action>lengow/manageorders_adminhtml_import</action>
+                    		<sort_order>20</sort_order>
+                    	</import>
+                    	<log translate="title" module="profileolabs_lengow">
+                    		<title>Lengow log</title>
+                    		<action>lengow/manageorders_adminhtml_log</action>
+                    		<sort_order>30</sort_order>
+                    	</log>
+                    </children>
+            	</manageorders>
+            	<export translate="title" module="profileolabs_lengow">
+            		<title>Export</title>
+                    <sort_order>200</sort_order>
+                    <children>
+                    	<set_product translate="title" module="profileolabs_lengow">
+                    		<title>Sélection de produit</title>
+                    		<action>lengow/export_adminhtml_export/update</action>
+                    		<sort_order>20</sort_order>
+                    	</set_product>
+                    </children>
+            	</export>
+            </children>
+        </lengow>
+	</menu>
+	<acl>
+		<resources>
+			<admin>
+				<children>
+					<system>
+						<children>
+							<config>
+                                    <children>
+                                        <lengow_mo translate="title" module="profileolabs_lengow">
+                                            <title>Lengow manage orders</title>
+                                        </lengow_mo>
+                                        <lengow_export translate="title" module="profileolabs_lengow">
+                                        	<title>Lengow Export des produits</title>
+                                        </lengow_export>
+                                        <lengow_apik translate="title" module="profileolabs_lengow">
+                                        	<title>Lengow API et Tagcapsule</title>
+                                        </lengow_apik>
+                                    </children>
+                                </config>
+						</children>
+					</system>
+					<lengow translate="title" module="profileolabs_lengow">
+                        <title>Lengow</title>
+                        <sort_order>22</sort_order>
+                        <children>
+                            <manageorders translate="title" >
+                                 <title>Lengow orders</title>
+                                 <children>
+                                     <order translate="title">
+                                         <title>Lengow orders</title>
+                                     </order>
+                                     <import translate="title" >
+                                         <title>Lengow import orders</title>
+                                     </import>
+                                     <log translate="title" >
+                                         <title>Lengow log</title>
+                                     </log>
+                                 </children>
+                            </manageorders>
+                            <export translate="title">
+                                <title>Export</title>
+                                <children>
+                                    <set_product translate="title" >
+                                        <title>Sélection de produit</title>
+                                    </set_product>
+                                </children>
+                            </export>
+                        </children>
+                    </lengow>
+				</children>
+			</admin>
+		</resources>
+	</acl>
+	</adminhtml>
+	<crontab>
+		<jobs>
+			<import_orders_lengow>
+				<schedule><cron_expr>*/30 * * * *</cron_expr></schedule>
+				<run><model>profileolabs_lengow/manageorders_observer::manageOrders</model></run>
+			</import_orders_lengow>
+		</jobs>
+	</crontab>
+	<default>
+		<lengow_api>
+			<general>
+				<api_key></api_key>
+			</general>
+		</lengow_api>
+		<lengow_mo>
+			<manageorders>
+				<enabled>0</enabled>
+				<limit_orders>30</limit_orders>
+				<period_orders>3</period_orders>
+				<create_invoice>1</create_invoice>
+				<apply_tax>0</apply_tax>
+				<is_test>0</is_test>
+				<ws_uri_test></ws_uri_test>
+				<ws_uri_prod>https://api.lengow.com/</ws_uri_prod>
+<!-- 				<api_key></api_key>
+ -->			</manageorders>
+		</lengow_mo>
+		<payment>
+			<lengow_purchaseorder>
+                <active>0</active>
+                <model>profileolabs_lengow/manageorders_payment_method_purchaseorder</model>
+                <order_status>new</order_status>
+                <title>Lengow Purchase Order</title>
+                <allowspecific>0</allowspecific>
+            </lengow_purchaseorder>
+		</payment>
+		<carriers>
+			<lengow>
+                <active>1</active>
+                <sallowspecific>0</sallowspecific>
+                <model>profileolabs_lengow/manageorders_shipping_carrier_lengow</model>
+                <name>Frais de port de la place de marché</name>
+                <title></title>
+            </lengow>
+		</carriers>
+		<lengow_export>
+			<general>
+				<active>1</active>
+				<valid_ip></valid_ip>
+				<filter_by_attribute>0</filter_by_attribute>
+				<limit_product>100</limit_product>
+				<ssl_tagcapsule>0</ssl_tagcapsule>
+				<export_soldout>1</export_soldout>
+				<producttype>configurable,simple</producttype>
+			</general>
+			<donnees>
+				<default_shipping_delay>2</default_shipping_delay>
+				<default_shipping_price></default_shipping_price>
+				<default_shipping_method>flatrate_flatrate</default_shipping_method>
+				<shipping_price_based_on>FR</shipping_price_based_on>
+				<formatdata>0</formatdata>
+			</donnees>
+			<performances>
+				<memory>1024</memory>
+				<usexml>0</usexml>
+				<usesegmentation>0</usesegmentation>
+				<usesavefile>0</usesavefile>
+			</performances>
+			<attributes_know>
+				<name>name</name>
+				<description>description</description>
+				<short_description>short_description</short_description>
+				<meta_keyword>meta_keyword</meta_keyword>
+				<weight>weight</weight>
+				<color>color</color>
+				<quantity>qty</quantity>
+			</attributes_know>
+		</lengow_export>
+	</default>
+</config>

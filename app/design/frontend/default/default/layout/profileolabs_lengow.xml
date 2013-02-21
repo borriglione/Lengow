@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+	<default>
+		 <!-- Profileolabs_Lengow -->
+        <reference name="before_body_end">
+            <block type="profileolabs_lengow/export_tracking" name="lengow_tracking_page" />
+        </reference>
+	</default>
+    <lengow_export_flux_index>
+	    	<block type="profileolabs_lengow/export_flow" output="toHtml" name="lw.export.flow"/>
+    </lengow_export_flux_index>
+</layout>

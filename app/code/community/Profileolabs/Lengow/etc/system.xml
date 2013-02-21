@@ -1,0 +1,424 @@
+<?xml version="1.0"?>
+<config>
+	<tabs>
+        <lengow translate="label" module="profileolabs_lengow">
+            <label>Lengow</label>
+            <sort_order>210</sort_order>
+        </lengow>
+    </tabs>
+	<sections>
+		<lengow_mo translate="label" module="profileolabs_lengow">
+			<label>Manage Orders</label>
+			<tab>lengow</tab>
+			<frontend_type>text</frontend_type>
+			<sort_order>100</sort_order>
+			<show_in_default>1</show_in_default>
+			<show_in_website>1</show_in_website>
+			<show_in_store>1</show_in_store>
+			<groups>
+				<manageorders translate="label" module="profileolabs_lengow">
+					<label>Manage Orders</label>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<sort_order>1</sort_order>
+					<fields>
+						<enabled>
+							<label>Enable manage orders</label>
+							<comment>Enable get orders from Lengow</comment>							
+							<frontend_type>select</frontend_type>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+						</enabled>
+						<period_orders>
+							<label>Import from x days</label>						
+							<sort_order>21</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Choose period for import command</comment>
+						</period_orders>
+						<limit_orders>
+							<label>Import by n orders</label>						
+							<sort_order>22</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<comment>Limit number of orders imported. 10 by default</comment>
+						</limit_orders>
+						<create_invoice>
+							<label>Create invoice</label>
+							<comment>Invoice is created when order getted from Lengow</comment>							
+							<frontend_type>select</frontend_type>
+							<sort_order>25</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+						</create_invoice>
+						<apply_tax>
+							<label>Apply tax</label>
+							<comment><![CDATA[Calculation of tax when order is created.<b style='color:red'>Do not active if you sell your products Excl. Tax</b>]]></comment>							
+							<frontend_type>select</frontend_type>
+							<sort_order>27</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+						</apply_tax>
+					</fields>
+				</manageorders>
+			</groups>
+		</lengow_mo>
+		<lengow_apik translate="label" module="profileolabs_lengow">
+			<label>Lengow API et Tagcapsule</label>
+			<tab>lengow</tab>
+			<frontend_type>text</frontend_type>
+			<sort_order>89</sort_order>
+			<show_in_default>1</show_in_default>
+			<show_in_website>1</show_in_website>
+			<show_in_store>1</show_in_store>
+			<groups>
+				<general translate="label" module="profileolabs_lengow">
+					<label>Lengow API et Tagcapsule</label>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<sort_order>1</sort_order>
+					<fields>
+						<login>
+							<label>Id Client Lengow</label>
+							<comment>Votre ID Client Lengow</comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>3</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</login>
+						<group>
+							<label>Id Group Lengow</label>
+							<comment>Votre ID Group Lengow</comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>5</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</group>
+						<api_key>
+							<label>Api key</label>							
+							<frontend_type>text</frontend_type>
+							<sort_order>20</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>0</show_in_website>
+							<show_in_store>0</show_in_store>
+						</api_key>
+					</fields>
+				</general>
+			</groups>
+		</lengow_apik>
+		<lengow_export translate="label" module="profileolabs_lengow">
+			<label>Configuration du Flux</label>
+			<tab>lengow</tab>
+			<frontend_type>text</frontend_type>
+			<sort_order>90</sort_order>
+			<show_in_default>1</show_in_default>
+			<show_in_website>1</show_in_website>
+			<show_in_store>1</show_in_store>
+			<groups>
+				<general translate="label">
+					<label>Generale</label>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<sort_order>1</sort_order>
+					<fields>
+						<active>
+							<label>Activer le module Lengow</label>
+							<comment></comment>
+							<frontend_type>select</frontend_type>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>adminhtml/system_config_source_enabledisable</source_model>
+						</active>
+						<valid_ip>
+							<label>IP(s) autorisée(s) pour l'export</label>
+							<comment>Autorisation d'accès à l'export catalogue, séparée par ;</comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>6</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</valid_ip>
+						<filter_by_attribute>
+							<label>Exporter uniquement les produits sélectionnés</label>
+							<comment>N'oubliez pas de sélectionner des produits à filtrer. <strong>Lengow > Sélectionnez les produits</strong></comment>
+							<frontend_type>select</frontend_type>
+							<sort_order>9</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+						</filter_by_attribute>	
+						<export_soldout>
+							<label>Exporter les produits hors stock</label>
+							<comment></comment>							
+							<frontend_type>select</frontend_type>
+							<sort_order>60</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+						</export_soldout>
+						<producttype>
+							<label>Exporter les produits de type</label>
+							<comment></comment>							
+							<frontend_type>select</frontend_type>
+							<sort_order>70</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>profileolabs_lengow/system_config_source_types</source_model>
+						</producttype>
+						<!--
+						<productstatus>
+							<label>Exporter les produits du statut</label>
+							<comment></comment>							
+							<frontend_type>select</frontend_type>
+							<sort_order>70</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>profileolabs_lengow/system_config_source_types</source_model>
+						</productstatus>
+						-->				
+					</fields>
+				</general>
+				<donnees translate="label">
+					<label>Données</label>
+					<comment></comment>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<sort_order>2</sort_order>
+					<fields>
+						<parentsimages>
+							<label>Fusionner les images des produits parents</label>
+							<comment></comment>							
+							<frontend_type>select</frontend_type>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+						</parentsimages>
+						<formatdata>
+							<label>Formater les données</label>
+							<comment><![CDATA[Remplace les caractères par des caractères HTML]]></comment>							
+							<frontend_type>select</frontend_type>
+							<sort_order>20</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+						</formatdata>
+						<shipping_price_based_on>
+							<label>Pays de livraison</label>
+							<comment>Pays par défaut pour calculer les frais de livraison</comment>
+							<frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_country</source_model>
+							<sort_order>30</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>			
+						</shipping_price_based_on>	
+						<default_shipping_delay>
+							<label>Délai de livraison</label>
+							<comment><![CDATA[Délai de livraison en <strong>jours</strong> par défaut si aucun attribut n'est mappé.]]></comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>40</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</default_shipping_delay>
+						<default_shipping_price>
+							<label>Frais de port</label>
+							<comment>Frais de port par défaut si aucune correpondance n'est trouvée.</comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>50</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</default_shipping_price>
+						<default_shipping_method>
+							<label>Méthode de livraison </label>
+							<comment>Méthode de livraison par défaut pour calculer les frais de livraison</comment>
+							<frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_shipping_allmethods</source_model>
+							<sort_order>60</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>						
+						</default_shipping_method>
+					</fields>
+				</donnees>
+				<performances translate="label">
+					<label>Performances</label>
+					<comment><![CDATA[<span style="color:red"><b>Attention : </b></span>Si vous ne savez comment configurer cette partie du module laissez les valeurs par défaut.]]></comment>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<sort_order>3</sort_order>
+					<fields>
+						<memory>
+							<label>Mémoire vive allouée pour l'export</label>
+							<comment><![CDATA[En Ko]]></comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</memory>
+						<usexml>
+							<label>Utiliser le XML</label>
+							<comment><![CDATA[Le XML est plus lourd, il consomme donc plus que le CSV.]]></comment>
+							<frontend_type>select</frontend_type>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+						</usexml>
+						<!--
+						<usesegmentation>
+							<label>Utiliser la ségmentation</label>
+							<comment><![CDATA[La ségmentation vous permet d'exporter votre flux en plusieurs fois. Utile pour les flux très lourds]]></comment>
+							<frontend_type>select</frontend_type>
+							<sort_order>20</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+						</usesegmentation>
+						<segmentationcount>
+							<label>Nombre de produit pour la ségmentation</label>
+							<comment><![CDATA[Nécessite que la ségmentation soit activée]]></comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>30</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</segmentationcount>
+						-->
+						<usesavefile>
+							<label>Sauvegarder le flux</label>
+							<comment><![CDATA[Enregistre le flux dans un fichier définit au lieu de l'afficher. Si activé l'URL du flux source sera modifée]]></comment>
+							<frontend_type>select</frontend_type>
+							<sort_order>40</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+						</usesavefile>
+					</fields>
+				</performances>
+				<!-- selection des attributs -->
+                <attributelist translate="label">
+                	<label>Choice of products attributes</label>
+					<comment>
+					<![CDATA[<span style="font-family:Courier;font-size:12px;color:red;font-weight:bold;">Pensez &agrave; sauvegarder apr&egrave;s votre s&eacute;lection / Remember to save after your selection</span>]]>
+					</comment>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<sort_order>20</sort_order>
+                    <fields>
+	       				<attributes translate="label">
+	                       	<label>Specific Attributes</label>
+							<frontend_type>multiselect</frontend_type>
+							<source_model>profileolabs_lengow/system_config_source_getattributes</source_model>
+							<!-- <backend_model>profileolabs_lengow/system_config_backend_getattributes</backend_model> -->
+	                        <sort_order>4</sort_order>
+	                        <show_in_default>1</show_in_default>
+	                        <show_in_website>1</show_in_website>
+	                        <show_in_store>1</show_in_store>
+	                    </attributes>
+	                </fields>
+            	</attributelist>
+				<attributes_know translate="label">
+					<label>Mapping d'attributs Connus</label>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<sort_order>30</sort_order>
+					<fields>
+						<name>
+							<label>Nom du produit</label>
+							<comment></comment>
+							<frontend_type>select</frontend_type>
+                            <source_model>profileolabs_lengow/export_source_attributes</source_model>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</name>
+						<description>
+							<label>Description du produit</label>
+							<comment></comment>
+							<frontend_type>select</frontend_type>
+                            <source_model>profileolabs_lengow/export_source_attributes</source_model>
+							<sort_order>20</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</description>
+						<short_description>
+							<label>Description courte du produit</label>
+							<comment></comment>
+							<frontend_type>select</frontend_type>
+                            <source_model>profileolabs_lengow/export_source_attributes</source_model>
+							<sort_order>30</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</short_description>
+						<meta_keyword>
+							<label>Mot clés</label>
+							<comment></comment>
+							<frontend_type>select</frontend_type>
+                            <source_model>profileolabs_lengow/export_source_attributes</source_model>
+							<sort_order>30</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</meta_keyword>
+						<weight>
+							<label>Poids</label>
+							<comment></comment>
+							<frontend_type>select</frontend_type>
+                            <source_model>profileolabs_lengow/export_source_attributes</source_model>
+							<sort_order>40</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</weight>
+						<color>
+							<label>Couleur</label>
+							<comment></comment>
+							<frontend_type>select</frontend_type>
+                            <source_model>profileolabs_lengow/export_source_attributes</source_model>
+							<sort_order>50</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</color>
+					</fields>
+				</attributes_know>
+			</groups>
+		</lengow_export>
+	</sections>
+</config>

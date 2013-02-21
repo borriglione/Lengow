@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout version="0.1.0">
+    <lengow_manageorders_adminhtml_order_index>
+        <reference name="content">
+            <block type="profileolabs_lengow/manageorders_adminhtml_order" name="manageorders.order.grid.container"></block>
+        </reference>
+    </lengow_manageorders_adminhtml_order_index>
+    <lengow_manageorders_adminhtml_log_index>
+        <reference name="content">
+            <block type="profileolabs_lengow/manageorders_adminhtml_log" name="manageorders.log.grid.container"></block>
+        </reference>
+    </lengow_manageorders_adminhtml_log_index>
+     <lengow_manageorders_adminhtml_import_index>
+        <reference name="content">
+            <block type="profileolabs_lengow/manageorders_adminhtml_import" name="manageorders.import" template="profileolabs/lengow/manageorders/import.phtml"></block>
+        </reference>
+    </lengow_manageorders_adminhtml_import_index>
+    <lengow_export_adminhtml_export_update>
+        <reference name="content">
+            <block type="profileolabs_lengow/export_adminhtml_product" name="products_list">
+                <block type="adminhtml/store_switcher" name="store_switcher" as="store_switcher">
+                    <action method="setUseConfirm"><params>0</params></action>
+                </block>
+            </block>
+        </reference>
+    </lengow_export_adminhtml_export_update>
+</layout>

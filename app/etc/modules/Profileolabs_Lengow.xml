@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Profileolabs_Lengow>
+            <active>true</active>
+            <codePool>community</codePool>
+        </Profileolabs_Lengow>
+    </modules>
+</config> 

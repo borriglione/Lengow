@@ -1,0 +1,17 @@
+Export Produits :
+	? Créer script de ségmentation automatique
+	? Export de tous les sites
+
+Import Commandes :
+	Checker les qty / prix total
+	Checker les TVA
+	Checker les Fdp
+	Checker les facturations
+	Checker les envois
+	Revoir les logs
+	Possibilité de remplire automatiquement les données manquantes
+
+
+TagCapsule :
+	Mise à jour
+	Créer un espace pour le BO

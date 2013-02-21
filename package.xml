@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<package>
+    <name>lengow_magento</name>
+    <version>1.5.7</version>
+    <stability>stable</stability>
+    <license uri="http://www.gnu.org/licenses/gpl.html">GPL</license>
+    <channel>community</channel>
+    <extends/>
+    <summary>Export your product catalogue to the Lengow solution and retrieve your orders.</summary>
+    <description>This module enables you to export your product catalog in CSV or XML format with many configurations for use it with the Lengow solution.&#xD;
+You can retrieve your orders for update your catalog and automatically create Magento orders.&#xD;
+&#xD;
+This module embeds TagCapsule, the universal tracker by Lengow</description>
+    <notes>Version : Stable 1.5.7&#xD;
+release date : 05/10/2012&#xD;
+----------------------------------------&#xD;
+Bugfix :&#xD;
+[Export] You can use the flat catalog without errors&#xD;
+[Export] Don't select configurable attributes do not raise errors&#xD;
+[Export] Attributes who raise errors are filtered&#xD;
+[Export] Bug in LIMIT and OFFSET fixed&#xD;
+[Export] Bug in selection of product fixed&#xD;
+[Export] Bug in stock filter fixed&#xD;
+[Order] Orders are imported in the right shop&#xD;
+[Order] Imports are available for all shops&#xD;
+&#xD;
+New functionalities :&#xD;
+[Export] Choice of product type to export&#xD;
+[Export] Possibility of merging the images of the parents products&#xD;
+[Export] Possibility to format data&#xD;
+[Export] Choice of memory allocated for the script&#xD;
+[Export] Choice of feed type (XML or CSV) in the backoffice&#xD;
+[Export] Possibility of display or save feed in the backoffice</notes>
+    <authors><author><name>Lengow</name><user>Lengow</user><email>technique@lengow.com</email></author></authors>
+    <date>2012-11-05</date>
+    <time>09:48:23</time>
+    <contents><target name="magecommunity"><dir name="Profileolabs"><dir name="Lengow"><dir name="Block"><dir name="Export"><dir name="Adminhtml"><file name="Process.php" hash="d5db6b844f93c1f5faf009394c3c9b96"/><dir name="Product"><file name="Grid.php" hash="b3631aa1e1c5e01cf596d52dd654e244"/></dir><file name="Product.php" hash="b292b892f9f2510663912df2a69ee3e1"/></dir><file name="Flow.php" hash="89b61f8c0b4ae2492414be1e22e725ca"/><file name="Tracking.php" hash="ae3a11fc7a90456691caaab7fd2b54c7"/></dir><dir name="Manageorders"><dir name="Adminhtml"><file name="Import.php" hash="bc3331c2557820878962b8b4d72c3546"/><dir name="Log"><file name="Grid.php" hash="9291b39927494c9b3f35bd2e6ef6a905"/></dir><file name="Log.php" hash="f635b2306288588cefff0a79602c582e"/><dir name="Order"><file name="Grid.php" hash="48c92c01e64e31f48fc890038a8286bf"/></dir><file name="Order.php" hash="b1ecea03eac41d4645b50a9571b407e7"/></dir><dir name="Payment"><dir name="Info"><file name="Purchaseorder.php" hash="16106e38bfbd66e00b5b4a240981c386"/></dir></dir></dir></dir><dir name="Helper"><file name="Data.php" hash="00ed73985d616e9e2d3855d8ab4562e8"/><file name="Feed.php" hash="9ac488f0bf4a0b62bff9955d84fa455b"/></dir><dir name="Model"><dir name="Export"><file name="Config.php" hash="a43fe9a490b545ecad9430fe9f271cbc"/><dir name="Convert"><dir name="Parser"><file name="Product.php" hash="6b53324ce6a08f9f059d6056750d3825"/></dir></dir><file name="Flow.php" hash="69201da4ca33877c1c56e9f8c3be7b57"/><file name="Observer.php" hash="82daca3693047d1037dfd323f3114828"/><dir name="Rewrite"><dir name="Catalog"><file name="Config.php" hash="a0e7ab56173ae263fecf3643fdd22bdc"/></dir></dir><dir name="Source"><file name="Attributes.php" hash="eed225272f5b676d9091f72ebcd31af5"/><file name="Types.php" hash="42b3007d3e96b85369ea8e09d9566ee9"/></dir><file name="Xmlflow.php" hash="5d8c73dd66eb67a333b2eb2296f87d53"/></dir><dir name="Manageorders"><file name="Config.php" hash="07acec603e65e2b3a4b9677c2e187a9e"/><file name="Connector.php" hash="c843d9b67b804733ad5c22c18539f310"/><dir name="Convert"><file name="Customer.php" hash="db9a136dbe13f66820af7b18e08418b4"/></dir><file name="Log.php" hash="15a7965b7534561b543ee47e8ecee0db"/><file name="Observer.php" hash="d244b9a4644f6d83c43e61d4c062aa69"/><file name="Order.php" hash="5968e07ec5f5f4122fda4f2e2df9fe44"/><dir name="Payment"><dir name="Method"><file name="Purchaseorder.php" hash="5e9352e63750e089cb5c3de604a117ab"/></dir></dir><dir name="Service"><dir name="Http"><dir name="Client"><dir name="Adapter"><file name="Curl.php" hash="f2ce51294f75ea512bb6c948f7f6400b"/><file name="Stream.php" hash="dd1db7397048045f89018a07fa57703c"/></dir></dir></dir></dir><file name="Service.php" hash="7c65ed7d2f9b0eed761a7e12f59fdcf2"/><dir name="Shipping"><dir name="Carrier"><file name="Lengow.php" hash="71efe29be3fd8a723e27b6fdcce6c98a"/></dir></dir></dir><dir name="Mysql4"><dir name="Manageorders"><dir name="Log"><file name="Collection.php" hash="4dc087000ccd077ca8881e5a30c2040f"/></dir><file name="Log.php" hash="d22b54267d4f691a831e3186545fbcdf"/></dir></dir><dir name="System"><dir name="Config"><dir name="Backend"><file name="Apikey.php" hash="a9456f80ab9f7acaae0030ea334ca9f9"/></dir><dir name="Source"><file name="Getattributes.php" hash="d10010b10d6b62b288ec96dc70f4b722"/><file name="Status.php" hash="ce2eb9ff5cc7406871e2b4baa6f65d9e"/><file name="Types" hash="949404f7e4602f54934dafaa2b80c57b"/><file name="Types.php" hash="ce2eb9ff5cc7406871e2b4baa6f65d9e"/></dir></dir></dir></dir><dir name="controllers"><dir name="Export"><dir name="Adminhtml"><file name="ExportController.php" hash="09373d4545a72f52307d701b4dae2fcc"/></dir><file name="FluxController.php" hash="e151bc5779bbdb1df5b8f3905de590d5"/></dir><dir name="Manageorders"><dir name="Adminhtml"><file name="ImportController.php" hash="298ec6da6e84abd7ec049b7db73aa8a6"/><file name="LogController.php" hash="ddd380eae65f78a40e88d7bc684feaf7"/><file name="OrderController.php" hash="e346679760252830186a4337227d45ca"/></dir></dir></dir><dir name="etc"><file name="config.xml" hash="b36e8b3ba4072decf9f7055051ecc95a"/><file name="system.xml" hash="82900e75bbb317f290190134acc94eb1"/></dir><dir name="sql"><dir name="profileolabs_lengow_setup"><file name="mysql4-install-0.1.0.php" hash="920c375f766f14769db7a762ee19aaa6"/><file name="mysql4-upgrade-0.1.0-0.1.1.php" hash="4a60b628fb4ac0d271c793195107b8b9"/></dir></dir></dir><file name="._Lengow_todo" hash="8a3377c5aebeee966ae29df918f5de82"/></dir></target><target name="magedesign"><dir name="adminhtml"><dir name="default"><dir name="default"><dir name="layout"><file name="profileolabs_lengow.xml" hash="762c4eec3b62e815062f3f8d923e1312"/></dir><dir name="template"><dir name="profileolabs"><dir name="lengow"><dir name="export"><file name="edit.phtml" hash="45ae09c29b8f825957633ffa35bb163f"/><file name="process.phtml" hash="b879d59b49fbb81351719aba4a96f0f2"/><file name="product.phtml" hash="f8727c0b0506d960dcd3e21712d45c61"/></dir><dir name="manageorders"><file name="import.phtml" hash="a2351efa62f2498dbf4bd1cf65ca6458"/><dir name="payment"><dir name="info"><file name="purchaseorder.phtml" hash="e6a5e1685f976d0ca93eb1d59dc8d652"/></dir></dir></dir></dir></dir></dir></dir></dir></dir><dir name="frontend"><dir name="default"><dir name="default"><dir name="layout"><file name="profileolabs_lengow.xml" hash="7b71e8d7aec5c7102d7cdca687997746"/></dir><dir name="template"><dir name="profileolabs"><dir name="lengow"><dir name="manageorders"><dir name="payment"><dir name="info"><file name="purchaseorder.phtml" hash="e6a5e1685f976d0ca93eb1d59dc8d652"/></dir></dir></dir></dir></dir></dir></dir></dir></dir></target><target name="mageetc"><dir name="modules"><file name="Profileolabs_Lengow.xml" hash="af1464283d2af5d77968d4d1684b190b"/></dir></target><target name="magelocal"><dir><dir name="fr_FR"><file name="Profileolabs_Lengow.csv" hash=""/></dir></dir></target><target name="mage"><dir><dir name="Script_Profileolabs"><file name="manageorders.php" hash="14f7021b5b807114d50a2caacf7b791f"/></dir></dir></target></contents>
+    <compatible/>
+    <dependencies><required><php><min>5.2.0</min><max>6.0.0</max></php></required></dependencies>
+</package>
