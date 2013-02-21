@@ -1,7 +1,7 @@
 shell/lengow_manageorders.php shell/lengow_manageorders.php
 app/etc/modules/Profileolabs_Lengow.xml app/etc/modules/Profileolabs_Lengow.xml
-app/design/frontend/default/default/layout/profileolabs_lengow.xml
-app/design/frontend/default/template/profileolabs app/design/frontend/default/template/profileolabs
-app/design/adminhtml/default/default/layout/profileolabs_lengow.xml
-app/design/adminhtml/default/template/profileolabs app/design/frontend/default/template/profileolabs
+app/design/frontend/default/default/layout/profileolabs_lengow.xml app/design/frontend/default/default/layout/profileolabs_lengow.xml
+app/design/frontend/default/default/template/profileolabs app/design/frontend/default/default/template/profileolabs
+app/design/adminhtml/default/default/layout/profileolabs_lengow.xml app/design/adminhtml/default/default/layout/profileolabs_lengow.xml
+app/design/adminhtml/default/default/template/profileolabs app/design/frontend/default/default/template/profileolabs
 app/code/community/Profileolabs/Lengow app/code/community/Profileolabs/Lengow
