@@ -6,14 +6,27 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
     private $_configModel = null;
     private $_configurableModel = null;
     private $_filename = 'lengow_feed';
+    private $_tax = null;
 
     
     public function __construct()
     {
+        #Init des variables
         $this->forceStore();
         $this->_productModel = Mage::getModel('catalog/product');
         $this->_configModel = Mage::getSingleton('profileolabs_lengow/export_config');
         $this->_configurableModel = Mage::getResourceSingleton('catalog/product_type_configurable');
+        $this->_eavModel = Mage::getResourceModel('eav/entity_attribute_collection');
+
+        #Récupération des taxes
+        $taxRates = Mage::helper('tax/data')->getTaxRatesByProductClass();
+        $taxRates = Zend_JSON::decode($taxRates);
+        $this->_tax = array();
+        foreach($taxRates as $k => $t)
+        {
+            $this->_tax[str_replace('value_', '', $k)] = (float) $t;
+        }
+        unset($taxRates, $t);
 
         #Gestion de la mémoire
         $_memory = $this->_configModel->getAny('performances', 'memory');
@@ -60,72 +73,99 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
     protected function _toHtml($type = 'xml')
     {
         $storeId = $this->_getStoreId();
-        $_excludes = array('media_gallery', 'tier_price');
+        $_excludes = array('media_gallery', 'tier_price', 'short_description', 'description');
 
         //Création de la liste des identifiants produits à exporter
-        $products = $this->_getProductCollection($storeId)->getData();
-        $product_list = $this->_collection2Array($products);
+        $products = $this->_getProductCollection($storeId);
+        $product_list = $this->_collection2Array($products->getData(), 'sku');
+
+        unset($products);
         
+
         //Mode size, retourne le nombre de produit total à exporter
         if(isset($_GET['mode']) && $_GET['mode'] == 'size')
             die((string)sizeof($product_list));
 
-        unset($products);
 
         //Gestion des attributs à exporter
         $attrsFromConfig = $this->getAttributesFromConfig();
         $products_data = array();
+        $this->_attrs = array();
 
         //Insertion des données
-        foreach($product_list as $product)
+        foreach($product_list as $sku)
         {
-            //Init des variables
-            $_parent = false;
-            $_p = $this->_productModel->load($product);
+            $_arr = array();
+            $parent = false;
+
+            //Instance Product
+            //Passe par le sku pour ne pas récupérer que le parent, passe ensuite par l'id pour récupérer toutes les infos
+            $product = Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
+            $product = Mage::getModel('catalog/product')->load($product->getId());
             
-            //Gestion des données parents
-            //Si une configuration nécessite d'aller regarder les infos des produits parents on charge le père du produit
-            if($this->_configModel->getAny('general', 'parentsimages'))
+            //Remplace un simple getData()
+            $data = $this->_productData($product);
+            //Force l'id parent sur l'id courant
+            $data['parent-id'] = $data['entity_id'];
+
+            //Données des parents
+            if($this->_configModel->getAny('donnees', 'parentsimages'))
             {
-                $parents = $this->_configurableModel->getParentIdsByChild($_p->getId());
+                //Charge les parents potentiels
+                $parents = $this->_configurableModel->getParentIdsByChild($product->getId());
+
                 if(sizeof($parents) > 0)
                 {
-                    $_parent = $this->_productModel->load($parents[0]);
-                    $parent = $_parent->getData();
+                    foreach($parents as $parent)
+                    {
+                        $data['parent-id'] = $parent;
+                        $parent = $this->_productModel->load($parent);
+                        $pdata['media_gallery'] = $parent->getData('media_gallery');
+                        break;
+                    }
+                    unset($parents);
                 }
             }
-            
-            $p = $_p->getData();
-            $_arr = array();
+            $qty = $product->getData('stock_item');
 
             //Insertion des données par défaut
-            $_arr['sku'] = $p['sku'];
-            $_arr['product-id'] = $p['entity_id'];
-            $_arr['qty'] = (int) $p['stock_item']['qty'];
-            $_arr = array_merge($_arr, $this->_getCategories($_p));
-            $_arr = array_merge($_arr, $this->_getPrices($_p));
-            $_arr = array_merge($_arr, $this->_getShippingInfo($_p));
-            //Si on fusionne les images parents et si le produit dispose d'un produit parent
-            if($this->_configModel->getAny('general', 'parentsimages') && $_parent !== false)
-                $_arr = array_merge($_arr, $this->_getImages($p['media_gallery']['images'], $parent['media_gallery']['images']));
-            else
-                $_arr = array_merge($_arr, $this->_getImages($p['media_gallery']['images']));
+            $_arr['sku'] = $data['sku'];
+            $_arr['product-id'] = $data['entity_id'];
+            $_arr['qty'] = (int) $qty['qty'];
+            $_arr['parent-id'] = $data['parent-id'];
+            $_arr['description'] = $data['description'];
+            $_arr['short_description'] = $data['short_description'];
+            unset($qty);
 
-            //Insertion des données configurées
+            $_arr = array_merge($_arr, $this->_getCategories($product));
+            $_arr = array_merge($_arr, $this->_getPrices($data));
+            $_arr = array_merge($_arr, $this->_getShippingInfo($product));
+
+            //Images, gestion de la fusion parent / enfant
+            if($this->_configModel->getAny('donnees', 'parentsimages') && $parent !== false)
+                $_arr = array_merge($_arr, $this->_getImages($data['media_gallery']['images'], $pdata['media_gallery']['images']));
+            else
+                $_arr = array_merge($_arr, $this->_getImages($data['media_gallery']['images']));
+
+            $_arr['product-url'] = str_replace('index.php/', '', Mage::getBaseUrl('web').$data['url_path']);
+           
+            //Boucle dans les attributs à exporter
             foreach($attrsFromConfig as $field => $attr)
             {
 
-                if(isset($p[$field]) && !in_array($field, $_excludes))
+                if(isset($data[$field]) && !in_array($field, $_excludes) && !isset($_arr[$field]))
                 {
                     //Formater les données
                     if($this->_configModel->getAny('performances', 'formatdata'))
-                        $_arr[$attr] = $this->_formatData($p[$field]);
+                        $_arr[$attr] = $this->_formatData($data[$field]);
                     else
-                        $_arr[$attr] = $p[$field];
+                        $_arr[$attr] = $data[$field];
                 }
-            }   
+            }
+            unset($data, $parent, $pdata);
             $products_data[] = $_arr;
         }
+        unset($this->_attrs);
 
         //Init de l'objet de gestion du flux
         $feed = Mage::getModel('profileolabs_lengow/export_xmlflow');
@@ -146,11 +186,13 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
         if($usexml)
         {
             $output = $feed->createXml();
+            unset($feed);
             $this->_filename .= '.xml';
         }
         else
         {
             $output = $feed->createCsv();
+            unset($feed);
             $this->_filename .= '.csv';
         }
 
@@ -167,7 +209,36 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
         return $output;
     }
     
+    protected function _productData($product)
+    {
+        $_data = array();
+        //Récupère les informations du produit
+        $data = $product->getData();
+        //Supprime les informations générant des bugs
+        unset($data['stock_item'], $data['is_in_stock'], $data['is_salable']);
 
+        //Boucle dans les attributs
+        foreach($data as $k => $d)
+        {
+            //Si le champs est potentiellement convertible en valeur
+            if(is_numeric($d) && strpos($k, '_id') < 1 && strpos(' '.$k, 'price') == 0)
+            {
+                //Convertion de l'id en valeur
+                if(!is_array($d) && !is_object($d) && $product->getAttributeText($k) != '')
+                    $_data[$k] = $product->getAttributeText($k);
+                else
+                    $_data[$k] = $d;
+            }
+            else
+                $_data[$k] = $d;
+        }
+        unset($data);
+
+        //Ajoute les données levant des bugs
+        $_data = array_merge($_data, array('stock_item' => $product->getData('stock_item'), 'is_in_stock' => $product->getData('is_in_stock'), 'is_salable' => $product->getData('is_salable')));
+
+        return $_data;
+    }
     protected function _getShippingInfo($product)
     {
         $data["shipping-name"]="";
@@ -198,35 +269,52 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
 
     protected function _getPrices($product)
     {
-        Varien_Profiler::start("___ FLOW FINAL PRICE ___"); 
-        $discountAmount = 0;
-        $finalPrice = $product->getData('price');
-        $priceBeforeDiscount = $product->getData('price');
-        if($product->getSpecialPrice() > 0 && $product->getSpecialPrice() < $finalPrice)    
-        {
-            $finalPrice = $product->getSpecialPrice();
-            $discountAmount = $product->getData('price') - $product->getSpecialPrice();
-        }
-        Varien_Profiler::stop("___ FLOW FINAL PRICE ___");  
-                
-        $product->setCalculatedFinalPrice($finalPrice);
-        $product->setData('final_price',$finalPrice);
+        //Extraction des prix et taxes
+        $price = (float) $product['price'];
+        $special_price = (float) $product['special_price'];
+        $special_from_date = $product['special_from_date'];
+        $special_to_date = $product['special_to_date'];
+        $tax = $this->_tax[$product['tax_class_id']];
 
-        $data["price-ttc"] = $finalPrice;
-        $data["price-before-discount"] = $priceBeforeDiscount;
-        $data["discount-amount"] = $product->getTypeId() != 'bundle' ?  $discountAmount : 0;
-        $data["discount-percent"] = $this->getPercent($product);    
+        //Check les dates de promotion
+        $time = time();
+        if($time < $this->mage2time($special_from_date) || $time > $this->mage2time($special_to_date))
+            $special_price = $price;
+        
+        //Si on force la tva
+        if($this->_configModel->getAny('donnees', 'forcetax'))
+        {
+            $price = $price + ($price * ($tax / 100));
+            if($special_price > 0)
+                $special_price = $special_price + ($special_price * ($tax / 100));
+        }
 
-        $data["start-date-discount"] = "";
-        $data["end-date-discount"] = "";    
-        if($product->getSpecialFromDate() != "")
+        //Calcul du montant de la réduction
+        if($special_price == 0)
+            $discount_amount = 0;
+        else
         {
-            $data["start-date-discount"]  = $product->getSpecialFromDate();
+            $discount_amount = $price - $special_price;
+            $discount_percent = ($discount_amount * 100) / $price;
         }
-        if($product->getSpecialToDate() != "")
+        
+        //Si réduction
+        if($special_price > 0)
         {
-            $data["end-date-discount"] = $product->getSpecialToDate();
+            $data["price-ttc"] = round($special_price, 2);
+            $data["price-before-discount"] = round($price, 2);
+            $data["discount-amount"] = round($discount_amount, 2);
+            $data["discount-percent"] = round($discount_percent, 2);
         }
+        else
+        {
+            $data["price-ttc"] = round($price, 2);
+            $data["price-before-discount"] = round($price, 2);
+            $data["discount-amount"] = '0';
+            $data["discount-percent"] = '0';
+        }
+        $data["start-date-discount"] = $special_from_date;
+        $data["end-date-discount"] = $special_to_date;
 
         return $data;
     }
@@ -235,7 +323,7 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
     {
         $catCollection = $product->getCategoryCollection();
         $categories = $catCollection->exportToArray();
-
+        
         //Cherche la catégorie de plus haut niveau
         $currentLevel = 0;
         $category = false;
@@ -347,6 +435,8 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
         }
 
         $products = $this->_productModel->getCollection()
+        ->addAttributeToSelect('sku')
+        ->addAttributeToFilter('status',1)
         ->addStoreFilter($storeId) //Filtre le store
         ->addAttributeToFilter('type_id',array('in'=>$_types)) //Filtre les types de produits
         ->joinTable('cataloginventory/stock_item', 'product_id=entity_id', array('qty'=>'qty','is_in_stock' => 'is_in_stock'), $this->_getStockSQL(), 'inner');
@@ -363,16 +453,28 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
         //Si on n'exporte que les produits selectionnés
         if($this->_configModel->isFilteredByAttribute())
         {  
-            //Tester cette ligne sur différentes configs;
-            //Il est possible que l'utilisation du catalogue à plat plante le script
-            //if($this->getFlatHelper()->isEnabled($storeId))
-            //Il semble aussi que selon la version le Magento la structure des flats products change
-            $products->addAttributeToFilter('lengow_product',1);
+            //Tester cette ligne sur différentes configs
+
+            //1.5.1.0 Flat catalog
+            if($this->getFlatHelper()->isEnabled($storeId) && Mage::getVersion() == '1.5.1.0'){  
+                $resource = Mage::getSingleton('core/resource');
+                $readConnection = $resource->getConnection('core_read');
+                $query = 'SELECT attribute_id FROM eav_attribute WHERE attribute_code = "lengow_product"';
+                $results = $readConnection->fetchAll($query);
+                $attribute_id = $results[0]['attribute_id'];
+
+                $products->joinTable('catalog_product_entity_int', 'entity_id=entity_id', array('value'), 'catalog_product_entity_int.attribute_id='.$attribute_id.' AND catalog_product_entity_int.value = 1', 'inner');
+                unset($results, $query, $resource, $readConnection);       
+            }
+            //Cas classique
+            else
+                $products->addAttributeToFilter('lengow_product',1);
+
+
         }
 
         //Filtre les produits non visibles
         Mage::getSingleton('catalog/product_status')->addVisibleFilterToCollection($products);
-
         return $products;
     }
     
@@ -494,5 +596,18 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
         return Mage::helper('catalog/product_flat');
     }
     
+    protected function datep($date)
+    {
+        $date = explode(' ', $date);
+        $date = explode('-', $date[0]);
+        $date = $date[1].'/'.$date[2].'/'.$date[0];
+        return $date;
+    }
     
+    protected function mage2time($from)
+    {
+        $from = $this->datep($from);
+        $from = strtotime($from);
+        return $from;
+    }
 }

@@ -12,7 +12,7 @@ class Profileolabs_Lengow_Export_FluxController extends Mage_Core_Controller_Fro
       set_time_limit(0);
 
       //ips serveur indexation lengow:
-      $ipAuthorize = array('95.131.137.18','95.131.137.19','95.131.137.21','95.131.137.26','95.131.137.27','82.216.196.142','88.191.109.39');
+      $ipAuthorize = array('95.131.137.18','95.131.137.19','95.131.137.21','95.131.137.26','95.131.137.27','82.216.196.142','88.191.109.39', '85.171.41.170');
       //ips autorisées dans la configuration du module
       $ip_conf = Mage::getStoreConfig('lengow_export/general/valid_ip');
       $tab_ip_conf = explode(';',$ip_conf);

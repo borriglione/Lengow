@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<Profileolabs_Lengow>
-			<version>1.5.5</version>
+			<version>1.5.7</version>
 		</Profileolabs_Lengow>
 	</modules>
 	<admin>
@@ -288,6 +288,7 @@
 				<default_shipping_method>flatrate_flatrate</default_shipping_method>
 				<shipping_price_based_on>FR</shipping_price_based_on>
 				<formatdata>0</formatdata>
+				<forcetax>0</forcetax>
 			</donnees>
 			<performances>
 				<memory>1024</memory>

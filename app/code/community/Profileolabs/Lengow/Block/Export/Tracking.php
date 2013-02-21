@@ -48,15 +48,18 @@ class Profileolabs_Lengow_Block_Export_Tracking extends Mage_Core_Block_Text
         $this->setPage('page');//by default
 
         $handles = $this->getLayout()->getUpdate()->getHandles();
-        
+
         if(in_array("cms_index_index", $handles))
           $this->setPage('homepage');
         
         if(in_array("checkout_onepage_success",$handles))
           $this->setPage('confirmation');
-        
-        if(in_array("checkout_onepage_index",$handles) || in_array("onestepcheckout_index_index",$handles))
-          $this->setPage('payment');
+
+        if(in_array("catalog_category_view",$handles))
+          $this->setPage('listepage');
+
+        if(in_array("checkout_cart_index",$handles))
+          $this->setPage('basket');
         
       }
       return $this->getData('page');
@@ -82,89 +85,92 @@ class Profileolabs_Lengow_Block_Export_Tracking extends Mage_Core_Block_Text
      */
     protected function _toHtml()
     {
+        //Sécurité
         if (!Mage::getStoreConfigFlag('lengow_export/general/active')) {
             return '';
         }
-        
-        if($this->getLogin() == "")
-      return '';
-        
-        if($this->getPage() == "confirmation")
-        {
-          
-          //Récupere l'id du caddie
-          $quoteId = Mage::getSingleton('checkout/session')->getLastQuoteId();
-          $orderId = Mage::getSingleton('checkout/session')->getLastRealOrderId();
-          //Si l'id du caddie ne passe pas avec getLastQuoteId on passe par getQuoteId
-          if(!$quoteId)
-          {
-            $quoteId = Mage::getSingleton('checkout/session')->getQuoteId();
-          }
-          //Si l'id n'existe toujours pas, on empeche l'affichage du tag
-          if(!$quoteId)
-              return '';
-          $quote = Mage::getModel('sales/quote')->load($quoteId);
-          
-            $orders = Mage::getResourceModel('sales/order_collection')
-                ->addAttributeToFilter('quote_id', $quoteId)
-                ->load();
-                
-             foreach($orders as $order)
-             { 
-              $grandTotal = round($order->getBaseGrandTotal(),2);
-              $incrementId = $order->getIncrementId();
-              
-              $productIds =array();
-              foreach ($order->getAllItems() as $item)
-              {
-                $productIds[] = $item->getProductId();
-              }
-                  
-                      $this->addText($this->writeTag($grandTotal,$quoteId,implode("|",$productIds)));
-            // $this->addText($this->writeTag($grandTotal,$incrementId,implode("|",$productIds)));
 
-             }
-          
-            $grandTotal = round($quote->getBaseGrandTotal(),2);
-            $incrementId = "";
-            
-            $productIds =array();
-            foreach ($quote->getAllItems() as $item)
-            {
-              $productIds[] = $item->getProductId();
-            }
-            
-                if(isset($quoteId)) {
-                    $quoteId = $quoteId;
-                }
-                else {
-                    $quoteId = 0;
-                }
-                $this->addText($this->writeTag($grandTotal,$orderId,implode("|",$productIds), 'payment'));
-                $this->addText($this->writeTag($grandTotal,$orderId,implode("|",$productIds)));
-        }
-        else
-        {
-          $this->addText($this->writeTag());
-        }
+        if($this->getLogin() == "")
+            return '';
         
+        //Récupération de l'id caddie
+        //Selon les versions et configs de Magento plusieurs méthodes peuvent échouées
+        $quote_id = false;
+        $quote_id = Mage::getSingleton('checkout/session')->getLastQuoteId();
+        if(!$quote_id)
+            $quote_id = Mage::getSingleton('checkout/session')->getQuoteId();
+        if($quote_id)
+        {
+            //Création de l'objet Caddie
+            $quote = Mage::getModel('sales/quote')->load($quote_id);
+            //Extrait les produits
+            $products_ids = $products_listing = array();
+            $i = 1;
+            foreach($quote->getAllVisibleItems() as $q)
+            {
+                $products_ids[] = $q->getId();
+                $products_listing[] = 'i'.$i.'='.$q->getId().'&p'.$i.'='.$q->getPrice().'&q'.$i.'='.$q->getQty();
+                $i++;
+            }
+            //Création des variables js
+            $products_ids = implode('|', $products_ids);
+            $products_listing = implode('&', $products_listing);
+
+            $orders = Mage::getResourceModel('sales/order_collection')->addAttributeToFilter('quote_id', $quote_id)->load();
+            foreach($orders as $o)
+            {
+              $order_id = $o->getIncrementId();
+            }
+        }
+
+        //Récupération de l'identifiant de page
+        $page = $this->getPage();
+        //Gestion des différentes pages
+        switch($page)
+        {
+            case 'homepage' :
+                $this->addText($this->writeTag($page));
+            break;
+            case 'page' :
+                $this->addText($this->writeTag($page));
+            break;
+            case 'listepage' :
+                $handles = $this->getLayout()->getUpdate()->getHandles();
+                foreach($handles as $h)
+                {
+                    if(substr($h, 0, 9) == 'CATEGORY_')
+                    {
+                        $category_id = str_replace('CATEGORY_', '', $h);
+                    }
+                }
+                $this->addText($this->writeTag($page, '', '', '', '', $category_id));
+            break;
+            case 'basket' :
+                $this->addText($this->writeTag($page, $quote->getBaseGrandTotal(), "", $products_ids, $products_listing));
+            break;
+            case 'confirmation' :
+                $this->addText($this->writeTag('payment', $quote->getBaseGrandTotal(), $order_id, $products_ids, $products_listing));
+                $this->addText($this->writeTag($page, $quote->getBaseGrandTotal(), $order_id, $products_ids, $products_listing));
+            break;
+        }
+
         return parent::_toHtml();
     }
     
-    protected function writeTag($amount="",$orderId="",$productIds="", $page = false)
+    protected function writeTag($page = 'page', $amount = '', $order_id = '', $products_ids = '', $basket_products = '', $id_categorie = '')
     {
-      if(!$page)
-        $page = $this->getPage();
       return '<!-- Tag Lengow TagCapsule -->
               <script type="text/javascript">
-              var page = "'.$page.'"; // #TYPE DE PAGE#
-              var order_amt = "'.$amount.'"; // #MONTANT COMMANDE#
-              var order_id = "'.$orderId.'"; // #ID COMMANDE#
-              var product_ids = "'.$productIds.'"; // #ID PRODUCT#
-              var ssl = "'.$this->useSSL().'"; // #SSL#
-              </script>
+                    var page = "'.$page.'"; // #TYPE DE PAGE#
+                    var order_amt = "'.$amount.'"; // #MONTANT COMMANDE#
+                    var order_id = "'.$order_id.'"; // #ID COMMANDE#
+                    var product_ids = "'.$products_ids.'"; // #ID PRODUCT#
+                    var basket_products = "'.$basket_products.'"; // #LISTING PRODUCTS IN BASKET#
+                    var ssl = "'.$this->useSSL().'"; // #SSL#
+                    var id_categorie = "'.$id_categorie.'" // #ID CATEGORIE#
+                </script>
               <script type="text/javascript" src="'.self::URI_TAG_CAPSULE.'?lengow_id='.$this->getLogin().'&idGroup='.$this->getGroup().'"></script>
-              <!-- Tag Lengow TagCapsule -->
+              <!-- End Tag Lengow TagCapsule -->
               ';
     }
 }

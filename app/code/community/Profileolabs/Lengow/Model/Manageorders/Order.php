@@ -84,10 +84,15 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
     
     public function getOrderIdsAlreadyImported()
     {
+    	$days = Mage::getStoreConfig('lengow_mo/manageorders/' . 'period_orders', $this->store_id);
+    	$start_date = date("Y-m-d", strtotime("-".$days." day")). ' 00:00:00';
+    	$end_date = date('Y-m-d'). ' 00:00:00';
+
     	if(count($this->_orderIdsAlreadyImported) < 1)
     	{
     		$orders = Mage::getModel('sales/order')->getCollection()
     												->addAttributeToFilter('from_lengow',1)
+    												->addAttributeToFilter('created_at',array('from' => $start_date, 'to' => $end_date, 'datetime' => true))
     												->addAttributeToSelect('order_id_lengow');
 
 
@@ -304,17 +309,32 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
 					$data['ShippingAddress'][$k]['Phone'] = '0251000000';
 			}
 
-			$convert_customer = Mage::getModel('profileolabs_lengow/manageorders_convert_customer');
-			$this->_customer = $convert_customer->toCustomer(current($data['BillingAddress']));
-			$billingAddress = $convert_customer->addresstoCustomer(current($data['BillingAddress']),$this->_customer);
-			
-			$this->_customer->addAddress($billingAddress);
-			
-			$shippingAddress = $convert_customer->addresstoCustomer(current($data['ShippingAddress']),$this->_customer,'shipping');
-			$this->_customer->addAddress($shippingAddress);
-			
+			//Vérifie si le client est déjà créé, si non le crée
+			$customer = Mage::getModel('customer/customer')->getCollection()->addAttributeToFilter('email', $data['BillingAddress'][0]['Email']);
+			if(sizeof($customer) == 0)
+			{
+				$convert_customer = Mage::getModel('profileolabs_lengow/manageorders_convert_customer');
+				$this->_customer = $convert_customer->toCustomer(current($data['BillingAddress']));
+				$billingAddress = $convert_customer->addresstoCustomer(current($data['BillingAddress']),$this->_customer);
+				
+				$this->_customer->addAddress($billingAddress);
+				
+				$shippingAddress = $convert_customer->addresstoCustomer(current($data['ShippingAddress']),$this->_customer,'shipping');
+				$this->_customer->addAddress($shippingAddress);
+				
 
-			$this->_customer->save();
+				$this->_customer->save();
+			}
+			else
+			{
+				foreach($customer as $c)
+				{
+					$this->_customer = $c;
+					break;
+				}
+				$customer = null;
+			}
+
 		
 		} catch (Exception $e) {
 			Mage::throwException($e);
@@ -390,9 +410,12 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
 		foreach($productsToIterate as $key=>$productLw)
 		{
 			$sku = $productLw['SKU'];
-			if(($productId = $this->getProductModel()->getResource()->getIdBySku($sku)) != false)
+			if(($productId = $this->getProductModel()->getResource()->getIdBySku($sku)) != false || Mage::getModel('catalog/product')->load($sku)->getData('entity_id') !== null)
 			{
-				$product =Mage::getModel('catalog/product')->load($productId);// $this->getProductModel()->reset()->load($productId);
+				if(($productId = $this->getProductModel()->getResource()->getIdBySku($sku)) != false )
+					$product = Mage::getModel('catalog/product')->load($productId);
+				else
+					$product = Mage::getModel('catalog/product')->load(Mage::getModel('catalog/product')->load($sku)->getData('entity_id'));
 				
 				$request = new Varien_Object(array('qty'=>$productLw['Quantity']));
 				if($product->getTypeId() == 'simple' && $product->getVisibility() == Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE)
@@ -436,8 +459,7 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
 				//Save the quote with the new product
 				$this->_getQuote()->save();
 				
-				if($this->isUnderVersion14())
-					$productLw['Price'] = $productLw['Price'] / $productLw['Quantity'];
+				$productLw['Price'] = $productLw['Price'] / $productLw['Quantity'];
 				
 				//Modify Item price
 				$item->setCustomPrice($productLw['Price']);
@@ -688,8 +710,9 @@ try {
 
             $this->_saveInvoice($order);
             
-            //Set array with lengow ids
+            //Set array with lengow ids 
             $this->_ordersIdsImported[] = $orderIdLengow;
+            $this->_orderIdsAlreadyImported[] = $orderIdLengow;
 
 
 			$ConfigLengow = new Profileolabs_Lengow_Model_Manageorders_Config();
@@ -713,7 +736,9 @@ try {
 
 			$Lengow->callMethod('getInternalOrderId', $array);
 			unset($array, $ConfigLengow, $Lengow);
-
+			
+			$this->_getQuote()->setIsActive(false)->save();
+            
             return $order;
             
         }
@@ -801,7 +826,8 @@ try {
            
             $this->_saveInvoice($order);
             
-            $this->_ordersIdsImported[] = $orderIdLengow;   
+            $this->_ordersIdsImported[] = $orderIdLengow;
+            $this->_orderIdsAlreadyImported[] = $orderIdLengow;   
 
             return $order;
             
@@ -828,6 +854,9 @@ try {
 		);
 
 		$Lengow->callMethod('getInternalOrderId', $array);
+
+		$this->_getQuote()->setIsActive(false)->save();
+            
 			unset($array, $ConfigLengow, $Lengow);
         
         return null;
