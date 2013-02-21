@@ -107,11 +107,13 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
     
     public function isAlreadyImported($idLengow)
     {
-    	$alreadyImported = $this->getOrderIdsAlreadyImported();
-    	if(in_array($idLengow,$alreadyImported))
-    		return true;
-    	
-    	return false;
+        $order = Mage::getModel("sales/order")->load($idLengow, "order_id_lengow");
+        
+        if (true === is_null($order->getId())) {
+            return false;
+        } else {
+            return true;
+        }
     }
     
     public function getSession()
@@ -146,127 +148,129 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
     	return $this->_config;
     }
 
-	/**
-	 * Get orders and create it
-	 */
-	public function manageOrders()
-	{
-		if(!$this->getConfig()->isEnabled())
-			return;
-		
-		require_once('Connector.php');
-		
-		if(Mage::app()->getStore()->getCode() != 'admin')
-			Mage::app()->setCurrentStore('admin');
-		
-			
-		$service = Mage::getSingleton('profileolabs_lengow/manageorders_service');
-		
-			try {
-			
-				/* @var $this->_result Varien_Simplexml_Element */
-				$this->_result = $service->getOrders(true);
-				$this->_nb_orders_imported = 0;
-			
-		
-			} catch (Exception $e) {
-				Mage::logException($e);
-				$message = Mage::helper('profileolabs_lengow')->__('Orders can not getted.');
-				$this->getHelper()->log($message);
+    /**
+     * Get orders and create it
+     */
+    public function manageOrders()
+    {
+        if(!$this->getConfig()->isEnabled())
+            return;
+        
+        require_once(Mage::getBaseDir().DS."app".DS."code".DS."community".DS."Profileolabs".DS."Lengow".DS."Model".DS."Manageorders".DS.'Connector.php');
+        
+        if(Mage::app()->getStore()->getCode() != 'admin')
+            Mage::app()->setCurrentStore('admin');
+        
+            
+        $service = Mage::getSingleton('profileolabs_lengow/manageorders_service');
+        
+            try {
+            
+                /* @var $this->_result Varien_Simplexml_Element */
+                $this->_result = $service->getOrders(true);
+                $this->_nb_orders_imported = 0;
+            
+        
+            } catch (Exception $e) {
+                Mage::logException($e);
+                $message = Mage::helper('profileolabs_lengow')->__('Orders can not getted.');
+                $this->getHelper()->log($message);
 
-				Mage::throwException($e);
-			}
-			
-			//We parse result
-			$nodes = $this->_result->children();
-			$message_order_already = '[ '.Mage::helper('profileolabs_lengow')->__('Order already imported').' : ';
-			$message_order_imported = ' / [ '.Mage::helper('profileolabs_lengow')->__('Order imported').' : ';
-			$nbOrderToUpdate = 0;
-			
-			foreach($nodes as $childName => $child)
-			{	
-				$orderLw = $this->getHelper()->asArray($child);
+                Mage::throwException($e);
+            }
+            
+            //We parse result
+            $nodes = $this->_result->children();
+            $message_order_already = '[ '.Mage::helper('profileolabs_lengow')->__('Order already imported').' : ';
+            $message_order_imported = ' / [ '.Mage::helper('profileolabs_lengow')->__('Order imported').' : ';
+            $nbOrderToUpdate = 0;
+            
+            foreach($nodes as $childName => $child)
+            {   
+                $orderLw = $this->getHelper()->asArray($child);
+                
+                if($this->isAlreadyImported($orderLw['IdOrder'])) {
+                    $orderMg = Mage::getModel('sales/order')->loadByAttribute('order_id_lengow', $orderLw['IdOrder'])->getData();
+                    $message_order_already .= $orderLw['IdOrder'].", ";
+                    //test si la commande à changé de statut
+                    if($orderLw['State'] != $orderMg['state'])
+                    {
+                        //Added complete Lengow order info to _updateOrderStatus-params
+                        $this->_updateOrderStatus($orderLw['IdOrder'], $orderLw['State'], $orderLw);
+                        
+                        $nbOrderToUpdate++;
+                    }
+                    continue;
+                }
+                else {
+                    $message_order_imported .= $orderLw['IdOrder'].", ";
+                    //si shipped créer un shipment
+                }
 
-				if($this->isAlreadyImported($orderLw['IdOrder'])) {
-					$orderMg = Mage::getModel('sales/order')->loadByAttribute('order_id_lengow', $orderLw['IdOrder'])->getData();
-					$message_order_already .= $orderLw['IdOrder'].", ";
-					//test si la commande à changé de statut
-					if($orderLw['State'] != $orderMg['state'])
-					{
-						$this->_updateOrderStatus($orderLw['IdOrder'], $orderLw['State']);
-						$nbOrderToUpdate++;
-					}
-					continue;
-				}
-				else {
-					$message_order_imported .= $orderLw['IdOrder'].", ";
-					//si shipped créer un shipment
-				}
+                
+                $this->_nb_orders_read++;
+                
+                $this->createAllForOrder($orderLw);
 
-				
-				$this->_nb_orders_read++;
-				
-				$this->createAllForOrder($orderLw);
-
-				if($this->_nb_orders_imported == $this->getConfig()->getLimitOrders()) {
-					$message = "Limit reached : ".$this->getConfig()->getLimitOrders();
-					$this->getHelper()->log($message);
-					break;
-				}
-				
-			
-			}
+                if($this->_nb_orders_imported == $this->getConfig()->getLimitOrders()) {
+                    $message = "Limit reached : ".$this->getConfig()->getLimitOrders();
+                    $this->getHelper()->log($message);
+                    break;
+                }
+                
+            
+            }
 
 
-			$message_order = substr($message_order_already, 0, -2).' ] '.substr($message_order_imported, 0, -2).' ]';
-			$this->getHelper()->log($message_order);
+            $message_order = substr($message_order_already, 0, -2).' ] '.substr($message_order_imported, 0, -2).' ]';
+            $this->getHelper()->log($message_order);
 
-			$ConfigLengow = new Profileolabs_Lengow_Model_Manageorders_Config();
-			$Lengow = new LengowConnector();
-			$Lengow->lengow_token = $ConfigLengow->getApiKey();
-			$Lengow->idClient = $ConfigLengow->getConfigDataExport('login');
+            $ConfigLengow = new Profileolabs_Lengow_Model_Manageorders_Config();
+            $Lengow = new LengowConnector();
+            $Lengow->lengow_token = $ConfigLengow->getApiKey();
+            $Lengow->idClient = $ConfigLengow->getConfigDataExport('login');
 
-			// Enregistrement LOG chez Lengow
-			$array = array(
-				'idClient' => (int)$ConfigLengow->getConfigDataExport('login'), 
-				'idGroup' => (int)$ConfigLengow->getConfigDataExport('group'),
-				'cde_total' => (int)$this->_nb_orders_imported,
-				'cde_success' => (int)$this->_nb_orders_imported,
-				'cde_error' => (int)0,
-				'logs' => $message_order,
-				'logs_client' => $message_order
-			);
-			$Lengow->callMethod('insertLogMagento', $array);
-			unset($array, $ConfigLengow, $Lengow);
+            // Enregistrement LOG chez Lengow
+            $array = array(
+                'idClient' => (int)$ConfigLengow->getConfigDataExport('login'), 
+                'idGroup' => (int)$ConfigLengow->getConfigDataExport('group'),
+                'cde_total' => (int)$this->_nb_orders_imported,
+                'cde_success' => (int)$this->_nb_orders_imported,
+                'cde_error' => (int)0,
+                'logs' => $message_order,
+                'logs_client' => $message_order
+            );
+            $Lengow->callMethod('insertLogMagento', $array);
+            unset($array, $ConfigLengow, $Lengow);
 
-			try {	
-				if($this->_nb_orders_imported > 0)
-				{
-					$result = $service->sendValidOrders($this->_ordersIdsImported);
-					
-					if($result)
-					{
-						if($result->error)
-						{
-							Mage::throwException($result->error);
-						}
-						
-						$this->_resultSendOrder = $result->status;
-					}
-					else
-					{
-						$this->getHelper()->log("Error in order ids validated");
-						Mage::throwException("Error in order ids validated");
-					}
-				}
-			
-			
-			} catch (Exception $e) {
-				$this->getHelper()->log($e->getMessage());
-				Mage::throwException($e);
-			}
-		return $this;
-	}
+            try {   
+                if($this->_nb_orders_imported > 0)
+                {
+                    $result = $service->sendValidOrders($this->_ordersIdsImported);
+                    
+                    if($result)
+                    {
+                        if($result->error)
+                        {
+                            Mage::throwException($result->error);
+                        }
+                        
+                        $this->_resultSendOrder = $result->status;
+                    }
+                    else
+                    {
+                        $this->getHelper()->log("Error in order ids validated");
+                        Mage::throwException("Error in order ids validated");
+                    }
+                }
+            
+            
+            } catch (Exception $e) {
+                $this->getHelper()->log($e->getMessage());
+                Mage::throwException($e);
+            }
+        return $this;
+    }
     
 	/**
 	 * Inititalize the quote with minimum requirement
@@ -549,164 +553,163 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
 		
 	}
 	
-	protected function _updateOrderStatus($order_id_lengow, $status)
-	{
-		$this->_nb_orders_updated++;
-		$order=Mage::getModel('sales/order')->loadByAttribute('order_id_lengow', $order_id_lengow);
-		$order_data = $order->getData();
-		$State = $order_data['state'];
-		//Si la commande est shipped ou processing création d'un facture
-		//Si shipped, création de l'envoi
-		if($State == 'shipped')
-		{
-			try {
-				if($order->canInvoice()) {
-					//Create invoice with pending status
-					$invoiceId = Mage::getModel('sales/order_invoice_api')
-						->create($order->getIncrementId(), array());
-
-					$invoice = Mage::getModel('sales/order_invoice')
-									->loadByIncrementId($invoiceId);
-
-					//set invoice status "paid"
-					$invoice->capture()->save();
-				}
-			}catch (Mage_Core_Exception $e) {
-			// print_r($e);
-			}
-try {
-    if($order->canShip()) {
-        //Create shipment
-        $shipmentid = Mage::getModel('sales/order_shipment_api')
+    protected function _updateOrderStatus($order_id_lengow, $status, $orderLw)
+    {
+        $this->_nb_orders_updated++;
+        $order=Mage::getModel('sales/order')->loadByAttribute('order_id_lengow', $order_id_lengow);
+        
+        //Stop order processing if order is closed
+        if ($order->getState() == "closed") {
+            return;
+        }
+        
+        //Update created at date
+        if(!is_null($order) && $order->getId())
+            $this->_changeDateCreatedAt($order, $orderLw['OrderDate']);
+        
+        $order_data = $order->getData();
+        $State = $order_data['state'];
+        //Si la commande est shipped ou processing création d'un facture
+        //Si shipped, création de l'envoi
+        if($State == 'shipped')
+        {
+            try {
+                //Check if invoice could/should be created
+                if ($this->getConfig()->createInvoice()
+                    && true === $order->canInvoice()
+                    && !$order->getInvoiceCollection()->getSize()) {
+                    //Create invoice with pending status
+                    $invoiceId = Mage::getModel('sales/order_invoice_api')
                         ->create($order->getIncrementId(), array());
-        //Add tracking information
-        $ship = Mage::getModel('sales/order_shipment_api')
-                        ->addTrack($order->getIncrementId(), array());       
+                    
+                    $invoice = Mage::getModel('sales/order_invoice')
+                                    ->loadByIncrementId($invoiceId);
+                    
+                    //set invoice status "paid"
+                    $invoice->capture()->save();
+                }
+            }catch (Mage_Core_Exception $e) {
+            // print_r($e);
+            }
+            
+            try {
+                if($order->canShip()) {
+                    //Create shipment
+                    $shipmentid = Mage::getModel('sales/order_shipment_api')
+                                    ->create($order->getIncrementId(), array());
+                    //Add tracking information
+                    $ship = Mage::getModel('sales/order_shipment_api')
+                                    ->addTrack($order->getIncrementId(), array());       
+                }
+            }catch (Mage_Core_Exception $e) {
+            //
+            }
+        }
+        //Passe les états
+        //Tous n'existent pas sur les marketplace
+        elseif($State == 'processing')
+            $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true);
+        elseif($State == 'new')
+            $order->setState(Mage_Sales_Model_Order::STATE_NEW, true);
+        elseif($State == 'pending')
+            $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true);
+        elseif($State == 'closed')
+            $order->setState(Mage_Sales_Model_Order::STATE_CLOSED, true);
+        elseif($State == 'canceled')
+            $order->setState(Mage_Sales_Model_Order::STATE_CANCELED, true);
+        elseif($State != 'shipped' && $State != 'complete')
+            $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true);
     }
-}catch (Mage_Core_Exception $e) {
-//
-}
-		}
-		//Passe les états
-		//Tous n'existent pas sur les marketplace
-		elseif($State == 'processing')
-			$order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true);
-		elseif($State == 'new')
-			$order->setState(Mage_Sales_Model_Order::STATE_NEW, true);
-		elseif($State == 'pending')
-			$order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true);
-		elseif($State == 'closed')
-			$order->setState(Mage_Sales_Model_Order::STATE_CLOSED, true);
-		elseif($State == 'canceled')
-			$order->setState(Mage_Sales_Model_Order::STATE_CANCELED, true);
-		elseif($State != 'shipped' && $State != 'complete')
-			$order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true);
-	}
 
-	/**
-	 * Save the new order with the quote
-	 * @param array $orderLw
-	 */
-	protected function _saveOrder(array $orderLw, $quoteId)
-	{
-		$orderIdLengow = (string)$orderLw['IdOrder'];
-		$orderCurrency = (string)$orderLw['Currency'];
-		$orderStoreID = (string)$orderLw['Store_Id'];
+    /**
+     * Save the new order with the quote
+     * @param array $orderLw
+     */
+    protected function _saveOrder(array $orderLw, $quoteId)
+    {
+        $orderIdLengow = (string)$orderLw['IdOrder'];
+        $orderCurrency = (string)$orderLw['Currency'];
+        $orderStoreID = (string)$orderLw['Store_Id'];
 
-		$additionalData = array("from_lengow"=>1,
-								"marketplace_lengow"=>$orderLw['Marketplace'],
-								"fees_lengow"=>(float)$orderLw['Fees'],
-								"global_currency_code"=>$orderCurrency,
-								"base_currency_code"=>$orderCurrency,
-								"store_currency_code"=>$orderCurrency,
-								"order_currency_code"=>$orderCurrency,
-								"store_id"=>$orderStoreID,
-								"order_id_lengow"=>$orderIdLengow
-								);
+        $additionalData = array("from_lengow"=>1,
+                                "marketplace_lengow"=>$orderLw['Marketplace'],
+                                "fees_lengow"=>(float)$orderLw['Fees'],
+                                "global_currency_code"=>$orderCurrency,
+                                "base_currency_code"=>$orderCurrency,
+                                "store_currency_code"=>$orderCurrency,
+                                "order_currency_code"=>$orderCurrency,
+                                "store_id"=>$orderStoreID,
+                                "order_id_lengow"=>$orderIdLengow
+                                );
 
-		$this->store_id = $orderStoreID;
+        $this->store_id = $orderStoreID;
 
 
-		$service = Mage::getModel('sales/service_quote', $this->_getQuote());
-		$service->setOrderData($additionalData);
+        $service = Mage::getModel('sales/service_quote', $this->_getQuote());
+        $service->setOrderData($additionalData);
 
-		$order = false;
-		if(method_exists($service,"submitAll"))
-		{
-			
-			$service->submitAll();
-        	$order = $service->getOrder();
-		}	
+        $order = false;
+        if(method_exists($service,"submitAll"))
+        {
+            
+            $service->submitAll();
+            $order = $service->getOrder();
+        }   
         else
         {
-        	$order = $service->submit();
+            $order = $service->submit();
         }
         if ($order) 
         {
-			//----------------------------- Etat ------------------------------
-			$orderState = (string)$orderLw['State'];
-			if($orderState == "processing"){
-				$State = 'processing';
-			}
-			elseif ($orderState == "shipped") {
-				$State = 'shipped';
-			}
-			else{
-				$State = 'processing';
-			}	
+            //----------------------------- Etat ------------------------------
+            $orderState = (string)$orderLw['State'];
+            if($orderState == "processing"){
+                $State = 'processing';
+            }
+            elseif ($orderState == "shipped") {
+                $State = 'shipped';
+            }
+            else{
+                $State = 'processing';
+            }   
 
-			$order=Mage::getModel('sales/order')->load($order->entity_id);
-			
-			//Si shipped, création de l'envoi
-			if($State == 'shipped')
-			{
-				try {
-					if($order->canInvoice()) {
-						//Create invoice with pending status
-						$invoiceId = Mage::getModel('sales/order_invoice_api')
-							->create($order->getIncrementId(), array());
-
-						$invoice = Mage::getModel('sales/order_invoice')
-										->loadByIncrementId($invoiceId);
-
-						//set invoice status "paid"
-						$invoice->capture()->save();
-					}
-				}catch (Mage_Core_Exception $e) {
-				// print_r($e);
-				}
-				try {
-				    if($order->canShip()) {
-				        //Create shipment
-				        $shipmentid = Mage::getModel('sales/order_shipment_api')
-				                        ->create($order->getIncrementId(), array());
-				        //Add tracking information
-				        $ship = Mage::getModel('sales/order_shipment_api')
-				                        ->addTrack($order->getIncrementId(), array());       
-				    }
-				}catch (Mage_Core_Exception $e) {
-				//
-				}
-			}
-			//Passe les états
-			//Tous n'existent pas sur les marketplace
-			elseif($State == 'processing')
-				$order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true);
-			elseif($State == 'new')
-				$order->setState(Mage_Sales_Model_Order::STATE_NEW, true);
-			elseif($State == 'pending')
-				$order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true);
-			elseif($State == 'complete')
-				$order->setState(Mage_Sales_Model_Order::STATE_COMPLETE, true);
-			elseif($State == 'closed')
-				$order->setState(Mage_Sales_Model_Order::STATE_CLOSED, true);
-			elseif($State == 'canceled')
-				$order->setState(Mage_Sales_Model_Order::STATE_CANCELED, true);
-			else
-				$order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true);
-			$order->save();
-			//-----------------------------------------------------------
-			
+            $order=Mage::getModel('sales/order')->load($order->entity_id);
+            
+            //Si shipped, création de l'envoi
+            if($State == 'shipped')
+            {
+                try {
+                    if($order->canShip()) {
+                        //Create shipment
+                        $shipmentid = Mage::getModel('sales/order_shipment_api')
+                                        ->create($order->getIncrementId(), array());
+                        //Add tracking information
+                        $ship = Mage::getModel('sales/order_shipment_api')
+                                        ->addTrack($order->getIncrementId(), array());       
+                    }
+                }catch (Mage_Core_Exception $e) {
+                //
+                }
+            }
+            //Passe les états
+            //Tous n'existent pas sur les marketplace
+            elseif($State == 'processing')
+                $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true);
+            elseif($State == 'new')
+                $order->setState(Mage_Sales_Model_Order::STATE_NEW, true);
+            elseif($State == 'pending')
+                $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true);
+            elseif($State == 'complete')
+                $order->setState(Mage_Sales_Model_Order::STATE_COMPLETE, true);
+            elseif($State == 'closed')
+                $order->setState(Mage_Sales_Model_Order::STATE_CLOSED, true);
+            elseif($State == 'canceled')
+                $order->setState(Mage_Sales_Model_Order::STATE_CANCELED, true);
+            else
+                $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true);
+            $order->save();
+            //-----------------------------------------------------------
+            
 
             $this->_saveInvoice($order);
             
@@ -715,29 +718,29 @@ try {
             $this->_orderIdsAlreadyImported[] = $orderIdLengow;
 
 
-			$ConfigLengow = new Profileolabs_Lengow_Model_Manageorders_Config();
-			$Lengow = new LengowConnector();
-			$Lengow->lengow_token = $ConfigLengow->getApiKey();
-			$Lengow->idClient = $ConfigLengow->getConfigDataExport('login');
+            $ConfigLengow = new Profileolabs_Lengow_Model_Manageorders_Config();
+            $Lengow = new LengowConnector();
+            $Lengow->lengow_token = $ConfigLengow->getApiKey();
+            $Lengow->idClient = $ConfigLengow->getConfigDataExport('login');
 
             //Remontée de l'id interne Magento sous Lengow
-			$array = array(
-				'idClient' => (int)$ConfigLengow->getConfigDataExport('login'), 
-				'idFlux' => $orderLw['IdFlux'],
-				'Marketplace' => $orderLw['Marketplace'],
-				'idCommandeMP' => $orderLw['IdOrder'],
-				'idCommandeMage' => (string) $order->getIncrementId(),
-				'statutCommandeMP' => $orderLw['State'],
-				'statutCommandeMage' => $State,
-				'idQuoteMage' => $quoteId,
-				'Message' => 'Import depuis: '.$orderLw['Marketplace'].'<br/>idCommande: '.$orderIdLengow, 
-				'type' => 'Magento'
-			);
+            $array = array(
+                'idClient' => (int)$ConfigLengow->getConfigDataExport('login'), 
+                'idFlux' => $orderLw['IdFlux'],
+                'Marketplace' => $orderLw['Marketplace'],
+                'idCommandeMP' => $orderLw['IdOrder'],
+                'idCommandeMage' => (string) $order->getIncrementId(),
+                'statutCommandeMP' => $orderLw['State'],
+                'statutCommandeMage' => $State,
+                'idQuoteMage' => $quoteId,
+                'Message' => 'Import depuis: '.$orderLw['Marketplace'].'<br/>idCommande: '.$orderIdLengow, 
+                'type' => 'Magento'
+            );
 
-			$Lengow->callMethod('getInternalOrderId', $array);
-			unset($array, $ConfigLengow, $Lengow);
-			
-			$this->_getQuote()->setIsActive(false)->save();
+            $Lengow->callMethod('getInternalOrderId', $array);
+            unset($array, $ConfigLengow, $Lengow);
+            
+            $this->_getQuote()->setIsActive(false)->save();
             
             return $order;
             
@@ -745,7 +748,7 @@ try {
               
         return null;
         
-	}
+    }
 	
 	protected function _saveOrder13(array $orderLw, $quoteId)
 	{
@@ -863,35 +866,40 @@ try {
         
 	}
 	
-	/**
-	 * Create and Save invoice for the new order
-	 * @param Mage_Sales_Model_Order $order
-	 */
-	protected function _saveInvoice($order)
-	{
-	 		Mage::dispatchEvent('checkout_type_onepage_save_order_after', array('order'=>$order, 'quote'=>$this->_getQuote()));
-	 		
-	 		if(!$this->getConfig()->createInvoice())
-	 			return $this;
-	 		
-        	$path = Mage::getBaseDir()."/app/code/core/Mage/Sales/Model/Service/Order.php";
-        	$invoice = false;
-        	if(file_exists($path))
-            	$invoice = Mage::getModel('sales/service_order', $order)->prepareInvoice();
+    /**
+     * Create and Save invoice for the new order
+     * @param Mage_Sales_Model_Order $order
+     */
+    protected function _saveInvoice($order)
+    {
+            Mage::dispatchEvent('checkout_type_onepage_save_order_after', array('order'=>$order, 'quote'=>$this->_getQuote()));
+            
+            if(!$this->getConfig()->createInvoice())
+                return $this;
+            
+            //Avoid duplicated invoices
+            if(false === $order->canInvoice() || $order->getInvoiceCollection()->getSize() > 0) {
+                return $this;
+            }
+            
+            $path = Mage::getBaseDir()."/app/code/core/Mage/Sales/Model/Service/Order.php";
+            $invoice = false;
+            if(file_exists($path))
+                $invoice = Mage::getModel('sales/service_order', $order)->prepareInvoice();
             else
-            	$invoice = $this->_initInvoice($order);
-            	
+                $invoice = $this->_initInvoice($order);
+                
             if($invoice)
             {
-            	 $invoice->register();
-            	 $invoice->getOrder()->setCustomerNoteNotify(false);
+                 $invoice->register();
+                 $invoice->getOrder()->setCustomerNoteNotify(false);
                  $invoice->getOrder()->setIsInProcess(true);
                  $transactionSave = Mage::getModel('core/resource_transaction')
                     ->addObject($invoice)
                     ->addObject($invoice->getOrder());
                 $transactionSave->save();
             }
-	}
+    }
 	
 	/**
 	 * Initialize invoice
