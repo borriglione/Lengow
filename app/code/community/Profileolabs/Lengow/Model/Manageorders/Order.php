@@ -9,66 +9,66 @@
  */
 class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
 {
-	/**
-	 * @var Mage_Sales_Model_Quote
-	 */
-	protected $_quote = null;
-	
-	/**
-	 * @var Mage_Customer_Model_Customer
-	 */
-	protected $_customer = null;
-	
-	/**
-	* Config Data of Module Manageorders
-	* @var Profileolabs_Lengow_Model_Manageorders_Config
-	*/
-	protected $_config = null;
-	
-	protected $_paymentMethod = 'lengow_purchaseorder';
-	
-	protected $_shippingMethod = 'lengow_lengow';
-	
-	protected $_nb_orders_imported = 0;
-	
-	protected $_nb_orders_read = 0;
-	
-	protected $_ordersIdsImported = array();
-	
-	protected $_orderIdsAlreadyImported = array();
-	
-	protected $_result;
-	
-	protected $_resultSendOrder = "";
-	
-	protected $_isUnderVersion14 = null;
-	
-	protected $_nb_orders_updated = 0;
-	 /**
+    /**
+     * @var Mage_Sales_Model_Quote
+     */
+    protected $_quote = null;
+    
+    /**
+     * @var Mage_Customer_Model_Customer
+     */
+    protected $_customer = null;
+    
+    /**
+    * Config Data of Module Manageorders
+    * @var Profileolabs_Lengow_Model_Manageorders_Config
+    */
+    protected $_config = null;
+    
+    protected $_paymentMethod = 'lengow_purchaseorder';
+    
+    protected $_shippingMethod = 'lengow_lengow';
+    
+    protected $_nb_orders_imported = 0;
+    
+    protected $_nb_orders_read = 0;
+    
+    protected $_ordersIdsImported = array();
+    
+    protected $_orderIdsAlreadyImported = array();
+    
+    protected $_result;
+    
+    protected $_resultSendOrder = "";
+    
+    protected $_isUnderVersion14 = null;
+    
+    protected $_nb_orders_updated = 0;
+     /**
      * Product model
      *
      * @var Mage_Catalog_Model_Product
      */
     protected $_productModel;
 
-	protected $store_id = 0;
+    protected $store_id = 0;
     
 
     public function getResultSendOrder()
     {
-    	return $this->_resultSendOrder;
+        return $this->_resultSendOrder;
     }
     
     public function isUnderVersion14()
     {
-    	if(is_null($this->_isUnderVersion14))
-    	{
-    		$this->_isUnderVersion14 = $this->getHelper()->isUnderVersion14();
-    	}
-    	return $this->_isUnderVersion14;
+        if(is_null($this->_isUnderVersion14))
+        {
+            $this->_isUnderVersion14 = $this->getHelper()->isUnderVersion14();
+        }
+        return $this->_isUnderVersion14;
     }
     
- 	/**
+     /**
      * Retrieve product model cache
      *
      * @return Mage_Catalog_Model_Product
@@ -84,25 +84,25 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
     
     public function getOrderIdsAlreadyImported()
     {
-    	$days = Mage::getStoreConfig('lengow_mo/manageorders/' . 'period_orders', $this->store_id);
-    	$start_date = date("Y-m-d", strtotime("-".$days." day")). ' 00:00:00';
-    	$end_date = date('Y-m-d'). ' 00:00:00';
+        $days = Mage::getStoreConfig('lengow_mo/manageorders/' . 'period_orders', $this->store_id);
+        $start_date = date("Y-m-d", strtotime("-".$days." day")). ' 00:00:00';
+        $end_date = date('Y-m-d'). ' 00:00:00';
 
-    	if(count($this->_orderIdsAlreadyImported) < 1)
-    	{
-    		$orders = Mage::getModel('sales/order')->getCollection()
-    												->addAttributeToFilter('from_lengow',1)
-    												->addAttributeToFilter('created_at',array('from' => $start_date, 'to' => $end_date, 'datetime' => true))
-    												->addAttributeToSelect('order_id_lengow');
+        if(count($this->_orderIdsAlreadyImported) < 1)
+        {
+            $orders = Mage::getModel('sales/order')->getCollection()
+                                                    ->addAttributeToFilter('from_lengow',1)
+                                                    ->addAttributeToFilter('created_at',array('from' => $start_date, 'to' => $end_date, 'datetime' => true))
+                                                    ->addAttributeToSelect('order_id_lengow');
 
 
-    		foreach($orders as $order)
-    		{
-    			$this->_orderIdsAlreadyImported[] = $order->getOrderIdLengow();
-    		}
-    	}
-    	
-    	return $this->_orderIdsAlreadyImported;
+            foreach($orders as $order)
+            {
+                $this->_orderIdsAlreadyImported[] = $order->getOrderIdLengow();
+            }
+        }
+        
+        return $this->_orderIdsAlreadyImported;
     }
     
     public function isAlreadyImported($idLengow)
@@ -118,20 +118,20 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
     
     public function getSession()
     {
-    	return Mage::getSingleton('checkout/session');
+        return Mage::getSingleton('checkout/session');
     }
     
     protected function _getQuote()
     {
-    	if(intval($this->store_id)>0) {
-    		$storeId = $this->store_id;
-    	}
-    	else {
-	    	$storeId = Mage::app()->getDefaultStoreView()->getId();
-    	}
-    	$this->getSession()->getQuote()->setStoreId($storeId);
+        if(intval($this->store_id)>0) {
+            $storeId = $this->store_id;
+        }
+        else {
+            $storeId = Mage::app()->getDefaultStoreView()->getId();
+        }
+        $this->getSession()->getQuote()->setStoreId($storeId);
 
-    	return $this->getSession()->getQuote();
+        return $this->getSession()->getQuote();
     }
     
     /**
@@ -140,12 +140,12 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
     */
     public function getConfig()
     {
-    	if(is_null($this->_config))
-    	{
-    		$this->_config = Mage::getSingleton('profileolabs_lengow/manageorders_config');
-    	}
+        if(is_null($this->_config))
+        {
+            $this->_config = Mage::getSingleton('profileolabs_lengow/manageorders_config');
+        }
     
-    	return $this->_config;
+        return $this->_config;
     }
 
     /**
@@ -272,287 +272,287 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
         return $this;
     }
     
-	/**
-	 * Inititalize the quote with minimum requirement
-	 * @param array $orderLw
-	 */
+    /**
+     * Inititalize the quote with minimum requirement
+     * @param array $orderLw
+     */
     protected function _initQuote(array $orderLw)
     {
                 
             //Super mode is setted to bypass check item qty ;)
-			$this->_getQuote()->setIsSuperMode(true);
-			
-			//Set boolean lengow and shipping prices in session for shopping method
-			$this->getSession()->setIsLengow(true);
-			
-			$this->_getQuote()->setCustomer($this->_customer);
-			return 0;	 
-	}
+            $this->_getQuote()->setIsSuperMode(true);
+            
+            //Set boolean lengow and shipping prices in session for shopping method
+            $this->getSession()->setIsLengow(true);
+            
+            $this->_getQuote()->setCustomer($this->_customer);
+            return 0;     
+    }
     
-	
-	/**
-	 * Create or Update customer with converter
-	 * @param array $data Data From Lengow
-	 */
-	protected function _createCustomer(array $data)
-	{
-		try {
-			
-			foreach($data['BillingAddress'] as $k => $a)
-			{
-				if($a['Email'] == '')
-					$data['BillingAddress'][$k]['Email'] = 'no-mail-'.$data['IdOrder'].'@'.strtolower($data['Marketplace']).'.com';
-				if($a['Phone'] == '')
-					$data['BillingAddress'][$k]['Phone'] = '0251000000';
-			}
-			foreach($data['ShippingAddress'] as $k => $a)
-			{
-				if($a['Email'] == '')
-					$data['ShippingAddress'][$k]['Email'] = 'no-mail-'.$data['IdOrder'].'@'.strtolower($data['Marketplace']).'.com';
-				if($a['Phone'] == '')
-					$data['ShippingAddress'][$k]['Phone'] = '0251000000';
-			}
+    
+    /**
+     * Create or Update customer with converter
+     * @param array $data Data From Lengow
+     */
+    protected function _createCustomer(array $data)
+    {
+        try {
+            
+            foreach($data['BillingAddress'] as $k => $a)
+            {
+                if($a['Email'] == '')
+                    $data['BillingAddress'][$k]['Email'] = 'no-mail-'.$data['IdOrder'].'@'.strtolower($data['Marketplace']).'.com';
+                if($a['Phone'] == '')
+                    $data['BillingAddress'][$k]['Phone'] = '0251000000';
+            }
+            foreach($data['ShippingAddress'] as $k => $a)
+            {
+                if($a['Email'] == '')
+                    $data['ShippingAddress'][$k]['Email'] = 'no-mail-'.$data['IdOrder'].'@'.strtolower($data['Marketplace']).'.com';
+                if($a['Phone'] == '')
+                    $data['ShippingAddress'][$k]['Phone'] = '0251000000';
+            }
 
-			//Vérifie si le client est déjà créé, si non le crée
-			$customer = Mage::getModel('customer/customer')->getCollection()->addAttributeToFilter('email', $data['BillingAddress'][0]['Email']);
-			if(sizeof($customer) == 0)
-			{
-				$convert_customer = Mage::getModel('profileolabs_lengow/manageorders_convert_customer');
-				$this->_customer = $convert_customer->toCustomer(current($data['BillingAddress']));
-				$billingAddress = $convert_customer->addresstoCustomer(current($data['BillingAddress']),$this->_customer);
-				
-				$this->_customer->addAddress($billingAddress);
-				
-				$shippingAddress = $convert_customer->addresstoCustomer(current($data['ShippingAddress']),$this->_customer,'shipping');
-				$this->_customer->addAddress($shippingAddress);
-				
+            //Vérifie si le client est déjà créé, si non le crée
+            $customer = Mage::getModel('customer/customer')->getCollection()->addAttributeToFilter('email', $data['BillingAddress'][0]['Email']);
+            if(sizeof($customer) == 0)
+            {
+                $convert_customer = Mage::getModel('profileolabs_lengow/manageorders_convert_customer');
+                $this->_customer = $convert_customer->toCustomer(current($data['BillingAddress']));
+                $billingAddress = $convert_customer->addresstoCustomer(current($data['BillingAddress']),$this->_customer);
+                
+                $this->_customer->addAddress($billingAddress);
+                
+                $shippingAddress = $convert_customer->addresstoCustomer(current($data['ShippingAddress']),$this->_customer,'shipping');
+                $this->_customer->addAddress($shippingAddress);
+                
 
-				$this->_customer->save();
-			}
-			else
-			{
-				foreach($customer as $c)
-				{
-					$this->_customer = $c;
-					break;
-				}
-				$customer = null;
-			}
+                $this->_customer->save();
+            }
+            else
+            {
+                foreach($customer as $c)
+                {
+                    $this->_customer = $c;
+                    break;
+                }
+                $customer = null;
+            }
 
-		
-		} catch (Exception $e) {
-			Mage::throwException($e);
-		}
-		
-	}
-	
-	public function createAllForOrder($orderLw)
-	{
-		try {
-			
-			//$this->_quote = null;
-			$this->_customer = null;
+        
+        } catch (Exception $e) {
+            Mage::throwException($e);
+        }
+        
+    }
+    
+    public function createAllForOrder($orderLw)
+    {
+        try {
+            
+            //$this->_quote = null;
+            $this->_customer = null;
 
-			
-			//Create or Update customer with addresses
-			$this->_createCustomer($orderLw);
-			$quoteId = $this->_initQuote($orderLw);
+            
+            //Create or Update customer with addresses
+            $this->_createCustomer($orderLw);
+            $quoteId = $this->_initQuote($orderLw);
 
-			//Add products to quote with data from Lengow
-			$this->_addProductsToQuote($orderLw);
-			
-			$order = null;
-			if(!$this->isUnderVersion14())
-				$order = $this->_saveOrder($orderLw, $quoteId);
-			else
-				$order = $this->_saveOrder13($orderLw, $quoteId);
-			
+            //Add products to quote with data from Lengow
+            $this->_addProductsToQuote($orderLw);
+            
+            $order = null;
+            if(!$this->isUnderVersion14())
+                $order = $this->_saveOrder($orderLw, $quoteId);
+            else
+                $order = $this->_saveOrder13($orderLw, $quoteId);
+            
 
-			$this->_nb_orders_imported++;
-			
-			if(!is_null($order) && $order->getId())
-				$this->_changeDateCreatedAt($order, $orderLw['OrderDate']);
-			
-			//Erase session for the next order
-			$this->getSession()->clear();
-				
-			
-			
-		}
-		catch(Exception $e)
-		{
-			$this->getHelper()->log($e->getMessage(),$orderLw['IdOrder']);
-			//Erase session for the next order
-			$this->getSession()->clear();
-			
-		}
-	}
-	
-	protected function _changeDateCreatedAt($order,$date)
-	{
-		try {
-			
-			$order->setCreatedAt($date);
-			$order->save();
-		} catch (Exception $e) {
-			Mage::logException($e);
-			Mage::throwException($message);
-		}
-	}
-	
-	
-	/**
-	 * Add products to quote with data from ShoppinfFlux
-	 * @param array $orderLw
-	 */
-	protected function _addProductsToQuote(array $orderLw)
-	{
-		$totalAmount = $orderLw['TotalAmount'];
-		$productsLw = current($orderLw['Products']);
-		$productsToIterate = current($productsLw);
+            $this->_nb_orders_imported++;
+            
+            if(!is_null($order) && $order->getId())
+                $this->_changeDateCreatedAt($order, $orderLw['OrderDate']);
+            
+            //Erase session for the next order
+            $this->getSession()->clear();
+                
+            
+            
+        }
+        catch(Exception $e)
+        {
+            $this->getHelper()->log($e->getMessage(),$orderLw['IdOrder']);
+            //Erase session for the next order
+            $this->getSession()->clear();
+            
+        }
+    }
+    
+    protected function _changeDateCreatedAt($order,$date)
+    {
+        try {
+            
+            $order->setCreatedAt($date);
+            $order->save();
+        } catch (Exception $e) {
+            Mage::logException($e);
+            Mage::throwException($message);
+        }
+    }
+    
+    
+    /**
+     * Add products to quote with data from ShoppinfFlux
+     * @param array $orderLw
+     */
+    protected function _addProductsToQuote(array $orderLw)
+    {
+        $totalAmount = $orderLw['TotalAmount'];
+        $productsLw = current($orderLw['Products']);
+        $productsToIterate = current($productsLw);
 
-		foreach($productsToIterate as $key=>$productLw)
-		{
-			$sku = $productLw['SKU'];
-			if(($productId = $this->getProductModel()->getResource()->getIdBySku($sku)) != false || Mage::getModel('catalog/product')->load($sku)->getData('entity_id') !== null)
-			{
-				if(($productId = $this->getProductModel()->getResource()->getIdBySku($sku)) != false )
-					$product = Mage::getModel('catalog/product')->load($productId);
-				else
-					$product = Mage::getModel('catalog/product')->load(Mage::getModel('catalog/product')->load($sku)->getData('entity_id'));
-				
-				$request = new Varien_Object(array('qty'=>$productLw['Quantity']));
-				if($product->getTypeId() == 'simple' && $product->getVisibility() == Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE)
-				{
-					
-					$parentIds = Mage::getResourceSingleton('catalog/product_type_configurable')
-	            						->getParentIdsByChild($product->getId());
-					
-					if(count($parentIds))
-					{
-						$parentId = current($parentIds);
-						
-						$attributesConf = $this->getHelper()->getAttributesConfigurable($parentId);
-						$superAttributes = array();
-						
-						foreach ($attributesConf as $attribute) {	
-	
-							$attributeCode = $attribute['attribute_code'];
-							$attributeId = $attribute['attribute_id'];
-							
-							$superAttributes[$attributeId] = $product->getData($attributeCode);
-						}
-						
-						$product = Mage::getModel('catalog/product')->load($parentId);
-						
-						$request->setData('super_attribute',$superAttributes);
-						
-					}
-				}
-				
-				
-				$item = $this->_getQuote()->addProduct($product,$request);
-				
-				if(!is_object($item))
-				{
-					$this->getSession()->clear();
-					Mage::throwException("le produit sku = ".$sku." n'a pas pu être ajouté! Id = ".$product->getId()." Item = ".(string)$item);
-				}
-				
-				
-				//Save the quote with the new product
-				$this->_getQuote()->save();
-				
-				$productLw['Price'] = $productLw['Price'] / $productLw['Quantity'];
-				
-				//Modify Item price
-				$item->setCustomPrice($productLw['Price']);
-				$item->setOriginalCustomPrice($productLw['Price']);
-				$item->save();	
-				
-				if(is_object($parentItem = $item->getParentItem()))
-				{
-					$parentItem->setCustomPrice($productLw['Price']);
-					$parentItem->setOriginalCustomPrice($productLw['Price']);
-					$parentItem->save();
-				}
+        foreach($productsToIterate as $key=>$productLw)
+        {
+            $sku = $productLw['SKU'];
+            if(($productId = $this->getProductModel()->getResource()->getIdBySku($sku)) != false || Mage::getModel('catalog/product')->load($sku)->getData('entity_id') !== null)
+            {
+                if(($productId = $this->getProductModel()->getResource()->getIdBySku($sku)) != false )
+                    $product = Mage::getModel('catalog/product')->load($productId);
+                else
+                    $product = Mage::getModel('catalog/product')->load(Mage::getModel('catalog/product')->load($sku)->getData('entity_id'));
+                
+                $request = new Varien_Object(array('qty'=>$productLw['Quantity']));
+                if($product->getTypeId() == 'simple' && $product->getVisibility() == Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE)
+                {
+                    
+                    $parentIds = Mage::getResourceSingleton('catalog/product_type_configurable')
+                                        ->getParentIdsByChild($product->getId());
+                    
+                    if(count($parentIds))
+                    {
+                        $parentId = current($parentIds);
+                        
+                        $attributesConf = $this->getHelper()->getAttributesConfigurable($parentId);
+                        $superAttributes = array();
+                        
+                        foreach ($attributesConf as $attribute) {    
+    
+                            $attributeCode = $attribute['attribute_code'];
+                            $attributeId = $attribute['attribute_id'];
+                            
+                            $superAttributes[$attributeId] = $product->getData($attributeCode);
+                        }
+                        
+                        $product = Mage::getModel('catalog/product')->load($parentId);
+                        
+                        $request->setData('super_attribute',$superAttributes);
+                        
+                    }
+                }
+                
+                
+                $item = $this->_getQuote()->addProduct($product,$request);
+                
+                if(!is_object($item))
+                {
+                    $this->getSession()->clear();
+                    Mage::throwException("le produit sku = ".$sku." n'a pas pu être ajouté! Id = ".$product->getId()." Item = ".(string)$item);
+                }
+                
+                
+                //Save the quote with the new product
+                $this->_getQuote()->save();
+                
+                $productLw['Price'] = $productLw['Price'] / $productLw['Quantity'];
+                
+                //Modify Item price
+                $item->setCustomPrice($productLw['Price']);
+                $item->setOriginalCustomPrice($productLw['Price']);
+                $item->save();    
+                
+                if(is_object($parentItem = $item->getParentItem()))
+                {
+                    $parentItem->setCustomPrice($productLw['Price']);
+                    $parentItem->setOriginalCustomPrice($productLw['Price']);
+                    $parentItem->save();
+                }
 
-				
-			}
-			else
-			{
-				
-				$this->getSession()->clear();
-				Mage::throwException("le produit sku = ".$sku." n'existe plus en base!");
-				
-			}
-		}
-			if(!$this->_customer->getDefaultBilling() || !$this->_customer->getDefaultShipping())
-				$this->_customer->load($this->_customer->getId());
-			
-			$customerAddressBillingId = $this->_customer->getDefaultBilling();
-			$customerAddressShippingId = $this->_customer->getDefaultShipping();
-			
-			//Set billing Address
-			$addressBilling =  $this->_getQuote()->getBillingAddress();
-			//Make sure addresses will be saved without validation errors
-			$addressBilling->setShouldIgnoreValidation(true);
-			$customerAddressBilling = Mage::getModel('customer/address')->load($customerAddressBillingId);
-			$addressBilling->importCustomerAddress($customerAddressBilling)->setSaveInAddressBook(0);
+                
+            }
+            else
+            {
+                
+                $this->getSession()->clear();
+                Mage::throwException("le produit sku = ".$sku." n'existe plus en base!");
+                
+            }
+        }
+            if(!$this->_customer->getDefaultBilling() || !$this->_customer->getDefaultShipping())
+                $this->_customer->load($this->_customer->getId());
+            
+            $customerAddressBillingId = $this->_customer->getDefaultBilling();
+            $customerAddressShippingId = $this->_customer->getDefaultShipping();
+            
+            //Set billing Address
+            $addressBilling =  $this->_getQuote()->getBillingAddress();
+            //Make sure addresses will be saved without validation errors
+            $addressBilling->setShouldIgnoreValidation(true);
+            $customerAddressBilling = Mage::getModel('customer/address')->load($customerAddressBillingId);
+            $addressBilling->importCustomerAddress($customerAddressBilling)->setSaveInAddressBook(0);
 
-			//Set shipping Address
-        	$addressShipping = $this->_getQuote()->getShippingAddress();
-        	//Make sure addresses will be saved without validation errors
-        	$addressShipping->setShouldIgnoreValidation(true);
-        	$customerAddressShipping = Mage::getModel('customer/address')->load($customerAddressShippingId);
-        	$addressShipping->importCustomerAddress($customerAddressShipping)->setSaveInAddressBook(0);
-        	$addressShipping->setSameAsBilling(0);
-        	
-        	
-        	//Convert shipping price by tax rate
-        	$shippingPrice = (float)$orderLw['TotalShipping'];
-        	$this->getSession()->setShippingPrice($shippingPrice);
-        	if (!Mage::helper('tax')->shippingPriceIncludesTax() && Mage::helper('tax')->getShippingTaxClass(null)) {
-        		$percent = null;
-        		$pseudoProduct = new Varien_Object();
-        		$pseudoProduct->setTaxClassId(Mage::helper('tax')->getShippingTaxClass(null));
-        	
-        		$taxClassId = $pseudoProduct->getTaxClassId();
-        		if (is_null($percent)) {
-        			if ($taxClassId) {
-        				$request = Mage::getSingleton('tax/calculation')->getRateRequest($addressShipping, $addressBilling, null, null);
-        				$percent = Mage::getSingleton('tax/calculation')->getRate($request->setProductClassId($taxClassId));
-        	
-        				if($percent !== false || !is_null($percent))
-        				{
-        					 
-        					$shippingPrice = $shippingPrice - ($shippingPrice/(100+$percent)*$percent);
-        					$this->getSession()->setShippingPrice($shippingPrice);
-        	
-        				}
-        			}
-        		}
-        	}
-        	
-        	//Set shipping Mehtod and collect shipping rates
-        	$addressShipping->setShippingMethod($this->_shippingMethod)->setCollectShippingRates(true);
-        	
-        	$this->_getQuote()->collectTotals();
-			$this->_getQuote()->save();
-	        
-        	//Set payment method
-        	/* @var $payment Mage_Sales_Quote_Payment */
-        	$this->_getQuote()->getShippingAddress()->setPaymentMethod($this->_paymentMethod);
-        	$payment = $this->_getQuote()->getPayment();
-        	$dataPayment = array('method'=>$this->_paymentMethod, 'marketplace'=>$orderLw['Marketplace']);
-        	$payment->importData($dataPayment);
-        	
-        	$this->_getQuote()->collectTotals();
-			$this->_getQuote()->save();
-        	        	
-		
-	}
-	
+            //Set shipping Address
+            $addressShipping = $this->_getQuote()->getShippingAddress();
+            //Make sure addresses will be saved without validation errors
+            $addressShipping->setShouldIgnoreValidation(true);
+            $customerAddressShipping = Mage::getModel('customer/address')->load($customerAddressShippingId);
+            $addressShipping->importCustomerAddress($customerAddressShipping)->setSaveInAddressBook(0);
+            $addressShipping->setSameAsBilling(0);
+            
+            
+            //Convert shipping price by tax rate
+            $shippingPrice = (float)$orderLw['TotalShipping'];
+            $this->getSession()->setShippingPrice($shippingPrice);
+            if (!Mage::helper('tax')->shippingPriceIncludesTax() && Mage::helper('tax')->getShippingTaxClass(null)) {
+                $percent = null;
+                $pseudoProduct = new Varien_Object();
+                $pseudoProduct->setTaxClassId(Mage::helper('tax')->getShippingTaxClass(null));
+            
+                $taxClassId = $pseudoProduct->getTaxClassId();
+                if (is_null($percent)) {
+                    if ($taxClassId) {
+                        $request = Mage::getSingleton('tax/calculation')->getRateRequest($addressShipping, $addressBilling, null, null);
+                        $percent = Mage::getSingleton('tax/calculation')->getRate($request->setProductClassId($taxClassId));
+            
+                        if($percent !== false || !is_null($percent))
+                        {
+                             
+                            $shippingPrice = $shippingPrice - ($shippingPrice/(100+$percent)*$percent);
+                            $this->getSession()->setShippingPrice($shippingPrice);
+            
+                        }
+                    }
+                }
+            }
+            
+            //Set shipping Mehtod and collect shipping rates
+            $addressShipping->setShippingMethod($this->_shippingMethod)->setCollectShippingRates(true);
+            
+            $this->_getQuote()->collectTotals();
+            $this->_getQuote()->save();
+            
+            //Set payment method
+            /* @var $payment Mage_Sales_Quote_Payment */
+            $this->_getQuote()->getShippingAddress()->setPaymentMethod($this->_paymentMethod);
+            $payment = $this->_getQuote()->getPayment();
+            $dataPayment = array('method'=>$this->_paymentMethod, 'marketplace'=>$orderLw['Marketplace']);
+            $payment->importData($dataPayment);
+            
+            $this->_getQuote()->collectTotals();
+            $this->_getQuote()->save();
+                        
+        
+    }
+    
     protected function _updateOrderStatus($order_id_lengow, $status, $orderLw)
     {
         $this->_nb_orders_updated++;
@@ -749,45 +749,45 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
         return null;
         
     }
-	
-	protected function _saveOrder13(array $orderLw, $quoteId)
-	{
-		$orderIdLengow = (string)$orderLw['IdOrder'];
-		$orderCurrency = (string)$orderLw['Currency'];
-		$orderStoreID = (string)$orderLw['Store_Id'];
-		
-		$orderState = (string)$orderLw['State'];
-		if($orderState == "Processing"){
-			$State = 'processing';
-		}
-		elseif ($orderState == "Shipped") {
-			$State = 'shipped';
-		}
-		else{
-			$State = 'processing';
-		}
+    
+    protected function _saveOrder13(array $orderLw, $quoteId)
+    {
+        $orderIdLengow = (string)$orderLw['IdOrder'];
+        $orderCurrency = (string)$orderLw['Currency'];
+        $orderStoreID = (string)$orderLw['Store_Id'];
+        
+        $orderState = (string)$orderLw['State'];
+        if($orderState == "Processing"){
+            $State = 'processing';
+        }
+        elseif ($orderState == "Shipped") {
+            $State = 'shipped';
+        }
+        else{
+            $State = 'processing';
+        }
 
-		$additionalData = array("from_lengow"=>1,
-								"marketplace_lengow"=>$orderLw['Marketplace'],
-								"fees_lengow"=>(float)$orderLw['Fees'],
-								"global_currency_code"=>$orderCurrency,
-								"base_currency_code"=>$orderCurrency,
-								"store_currency_code"=>$orderCurrency,
-								"order_currency_code"=>$orderCurrency,
-								"store_id"=>$orderStoreID,
-								"order_id_lengow"=>$orderIdLengow,
-								"state"=>$State,
-								"status"=>$State
-								);
+        $additionalData = array("from_lengow"=>1,
+                                "marketplace_lengow"=>$orderLw['Marketplace'],
+                                "fees_lengow"=>(float)$orderLw['Fees'],
+                                "global_currency_code"=>$orderCurrency,
+                                "base_currency_code"=>$orderCurrency,
+                                "store_currency_code"=>$orderCurrency,
+                                "order_currency_code"=>$orderCurrency,
+                                "store_id"=>$orderStoreID,
+                                "order_id_lengow"=>$orderIdLengow,
+                                "state"=>$State,
+                                "status"=>$State
+                                );
 
 
-		$this->store_id = $orderStoreID;
+        $this->store_id = $orderStoreID;
 
-	
-		$billing = $this->_getQuote()->getBillingAddress();
+    
+        $billing = $this->_getQuote()->getBillingAddress();
         $shipping = $this->_getQuote()->getShippingAddress();
-		
-		$this->_getQuote()->reserveOrderId();
+        
+        $this->_getQuote()->reserveOrderId();
         $convertQuote = Mage::getModel('sales/convert_quote');
        
         $order = $convertQuote->addressToOrder($shipping);
@@ -819,10 +819,10 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
 
         Mage::dispatchEvent('checkout_type_onepage_save_order_after', array('order'=>$order, 'quote'=>$this->getQuote()));
         
-		$this->_getQuote()->setIsActive(false);
+        $this->_getQuote()->setIsActive(false);
         $this->_getQuote()->save();
         
-		///////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////
         
         if ($order) 
         {
@@ -837,35 +837,35 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
         }
 
 
-		$ConfigLengow = new Profileolabs_Lengow_Model_Manageorders_Config();
-		$Lengow = new LengowConnector();
-		$Lengow->lengow_token = $ConfigLengow->getApiKey();
-		$Lengow->idClient = $ConfigLengow->getConfigDataExport('login');
+        $ConfigLengow = new Profileolabs_Lengow_Model_Manageorders_Config();
+        $Lengow = new LengowConnector();
+        $Lengow->lengow_token = $ConfigLengow->getApiKey();
+        $Lengow->idClient = $ConfigLengow->getConfigDataExport('login');
 
         //Remontée de l'id interne Magento sous Lengow
-		$array = array(
-			'idClient' => (int)$ConfigLengow->getConfigDataExport('login'), 
-			'idFlux' => $orderLw['IdFlux'],
-			'Marketplace' => $orderLw['Marketplace'],
-			'idCommandeMP' => $orderIdLengow,
-			'idCommandeMage' => (string) $order->getIncrementId(),
-			'statutCommandeMP' => $orderLw['State'],
-			'statutCommandeMage' => $State,
-			'idQuoteMage' => $quoteId,
-			'Message' => 'Import depuis: '.$orderLw['Marketplace'].'<br/>idCommande: '.$orderIdLengow, 
-			'type' => 'Magento'
-		);
+        $array = array(
+            'idClient' => (int)$ConfigLengow->getConfigDataExport('login'), 
+            'idFlux' => $orderLw['IdFlux'],
+            'Marketplace' => $orderLw['Marketplace'],
+            'idCommandeMP' => $orderIdLengow,
+            'idCommandeMage' => (string) $order->getIncrementId(),
+            'statutCommandeMP' => $orderLw['State'],
+            'statutCommandeMage' => $State,
+            'idQuoteMage' => $quoteId,
+            'Message' => 'Import depuis: '.$orderLw['Marketplace'].'<br/>idCommande: '.$orderIdLengow, 
+            'type' => 'Magento'
+        );
 
-		$Lengow->callMethod('getInternalOrderId', $array);
+        $Lengow->callMethod('getInternalOrderId', $array);
 
-		$this->_getQuote()->setIsActive(false)->save();
+        $this->_getQuote()->setIsActive(false)->save();
             
-			unset($array, $ConfigLengow, $Lengow);
+            unset($array, $ConfigLengow, $Lengow);
         
         return null;
         
-	}
-	
+    }
+    
     /**
      * Create and Save invoice for the new order
      * @param Mage_Sales_Model_Order $order
@@ -900,18 +900,18 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
                 $transactionSave->save();
             }
     }
-	
-	/**
-	 * Initialize invoice
-	 * @param Mage_Sales_Model_Order $order
-	 * @return Mage_Sales_Model_Order_Invoice $invoice
-	 */
-	protected function _initInvoice($order)
-	{
-		
-			$convertor  = Mage::getModel('sales/convert_order');
+    
+    /**
+     * Initialize invoice
+     * @param Mage_Sales_Model_Order $order
+     * @return Mage_Sales_Model_Order_Invoice $invoice
+     */
+    protected function _initInvoice($order)
+    {
+        
+            $convertor  = Mage::getModel('sales/convert_order');
             $invoice    = $convertor->toInvoice($order);
-			$update = false;
+            $update = false;
             $savedQtys = array();
             $itemsToInvoice = 0;
 
@@ -945,11 +945,11 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
                 $invoice->addItem($item);
                 
                  if ($itemsToInvoice <= 0){
-                	Mage::throwException($this->__('Invoice without products could not be created.'));
+                    Mage::throwException($this->__('Invoice without products could not be created.'));
                 
-            	}
+                }
 
-            	
+                
                 
             }
             
@@ -957,26 +957,26 @@ class Profileolabs_Lengow_Model_Manageorders_Order extends Varien_Object
            $invoice->collectTotals(); 
             
          return $invoice;
-		
-	}
-	
-	/**
-	 * Get Helper
-	 * @return Profileolabs_Lengow_Model_Manageorders_Helper_Data
-	 */
-	public function getHelper()
-	{
-		return Mage::helper('profileolabs_lengow');
-	}
-	
-	public function getNbOrdersImported()
-	{
-		return $this->_nb_orders_imported;
-	}
+        
+    }
+    
+    /**
+     * Get Helper
+     * @return Profileolabs_Lengow_Model_Manageorders_Helper_Data
+     */
+    public function getHelper()
+    {
+        return Mage::helper('profileolabs_lengow');
+    }
+    
+    public function getNbOrdersImported()
+    {
+        return $this->_nb_orders_imported;
+    }
 
-	public function getNbOrdersUpdated()
-	{
-		return $this->_nb_orders_updated;
-	}
+    public function getNbOrdersUpdated()
+    {
+        return $this->_nb_orders_updated;
+    }
 
 }

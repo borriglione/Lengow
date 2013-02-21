@@ -8,8 +8,8 @@
  */
 class Profileolabs_Lengow_Block_Manageorders_Adminhtml_Order_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
-	
-	protected $_withGrid = true;
+    
+    protected $_withGrid = true;
 
     public function __construct()
     {
@@ -28,12 +28,12 @@ class Profileolabs_Lengow_Block_Manageorders_Adminhtml_Order_Grid extends Mage_A
      */
     protected function _getCollectionClass()
     {
-    	$path = Mage::getBaseDir()."/app/code/core/Mage/Sales/Model/Mysql4/Order/Grid/Collection.php";
-    	//die($path);
-    	if(file_exists($path))
-        	return 'sales/order_grid_collection';
-        	
-       	$this->_withGrid = false;
+        $path = Mage::getBaseDir()."/app/code/core/Mage/Sales/Model/Mysql4/Order/Grid/Collection.php";
+        //die($path);
+        if(file_exists($path))
+            return 'sales/order_grid_collection';
+            
+           $this->_withGrid = false;
         return 'sales/order_collection';
     }
 
@@ -44,7 +44,7 @@ class Profileolabs_Lengow_Block_Manageorders_Adminhtml_Order_Grid extends Mage_A
         
         if(!$this->_withGrid)
         {
-        	$collection->addAttributeToSelect('*')
+            $collection->addAttributeToSelect('*')
             ->joinAttribute('billing_firstname', 'order_address/firstname', 'billing_address_id', null, 'left')
             ->joinAttribute('billing_lastname', 'order_address/lastname', 'billing_address_id', null, 'left')
             ->joinAttribute('shipping_firstname', 'order_address/firstname', 'shipping_address_id', null, 'left')
@@ -128,9 +128,9 @@ class Profileolabs_Lengow_Block_Manageorders_Adminhtml_Order_Grid extends Mage_A
             'header'=> Mage::helper('profileolabs_lengow')->__('Fees'),
             'type'  => 'currency',
             'index' => 'fees_lengow',
-        	'currency' => 'base_currency_code',
+            'currency' => 'base_currency_code',
         ));
-		
+        
         //END data Lengow
         
         $this->addColumn('status', array(

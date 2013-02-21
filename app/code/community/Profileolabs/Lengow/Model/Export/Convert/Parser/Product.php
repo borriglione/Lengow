@@ -11,16 +11,16 @@ class Profileolabs_Lengow_Model_Export_Convert_Parser_Product
      */
     public function getExternalAttributes()
     {
-    	$productAttributes = array();
-    	if(file_exists(Mage::getModuleDir(null,'Mage_Catalog') ."Model/Resource/Eav/Mysql4/Product/Attribute/Collection"))
-        	$productAttributes  = Mage::getResourceModel('catalog/product_attribute_collection')->load();
+        $productAttributes = array();
+        if(file_exists(Mage::getModuleDir(null,'Mage_Catalog') ."Model/Resource/Eav/Mysql4/Product/Attribute/Collection"))
+            $productAttributes  = Mage::getResourceModel('catalog/product_attribute_collection')->load();
         else
         {
-        	
-	        $entityTypeId = Mage::getSingleton('eav/config')->getEntityType('catalog_product')->getId();
-	        $productAttributes = Mage::getResourceModel('eav/entity_attribute_collection')
-	            ->setEntityTypeFilter($entityTypeId)
-	            ->load();
+            
+            $entityTypeId = Mage::getSingleton('eav/config')->getEntityType('catalog_product')->getId();
+            $productAttributes = Mage::getResourceModel('eav/entity_attribute_collection')
+                ->setEntityTypeFilter($entityTypeId)
+                ->load();
         }
         
         $attributes         = $this->_externalFields;

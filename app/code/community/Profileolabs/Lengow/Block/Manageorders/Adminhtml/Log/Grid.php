@@ -8,7 +8,7 @@
  */
 class Profileolabs_Lengow_Block_Manageorders_Adminhtml_Log_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
-	
+    
 
     public function __construct()
     {

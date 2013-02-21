@@ -38,12 +38,12 @@ class Profileolabs_Lengow_Model_Export_Rewrite_Catalog_Config extends Mage_Catal
      */
     public function getAttribute($entityType, $code)
     {
-    	$attribute = parent::getAttribute($entityType, $code);
-    	if(is_object($attribute) && $attribute->getAttributeCode() == "")
-    	{
-    		$attribute->setAttributeCode($code);
-    	}
-    	return $attribute;
+        $attribute = parent::getAttribute($entityType, $code);
+        if(is_object($attribute) && $attribute->getAttributeCode() == "")
+        {
+            $attribute->setAttributeCode($code);
+        }
+        return $attribute;
     }
 
    

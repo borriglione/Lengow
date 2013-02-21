@@ -198,7 +198,7 @@ class Profileolabs_Lengow_Block_Export_Adminhtml_Product_Grid extends Mage_Admin
         $this->setMassactionIdField('entity_id');
         $this->getMassactionBlock()->setFormFieldName('product');
 
-		$optionsLw = array(0=>"Non",1=>"Oui");
+        $optionsLw = array(0=>"Non",1=>"Oui");
         $this->getMassactionBlock()->addItem('publish', array(
              'label'=> Mage::helper('profileolabs_lengow')->__('Changer la publication'),
              'url'  => $this->getUrl('*/*/massPublish', array('_current'=>true)),

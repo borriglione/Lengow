@@ -7,8 +7,8 @@
  */
 class Profileolabs_Lengow_Block_Export_Adminhtml_Process extends Mage_Adminhtml_Block_Abstract
 {
-	
-	 /**
+    
+     /**
      * Flag for flow model
      * @var boolean
      */
@@ -18,13 +18,13 @@ class Profileolabs_Lengow_Block_Export_Adminhtml_Process extends Mage_Adminhtml_
      * @var Profileolabs_Lengow_Model_Export_Flow
      */
     protected $_flowModel = null;
-	
-	public function _getFlowModel()
-	{
-		return $this->_flowModel;
-	}
-	
-	 /**
+    
+    public function _getFlowModel()
+    {
+        return $this->_flowModel;
+    }
+    
+     /**
      * Return batch model and initialize it if need
      * @return Profileolabs_Lengow_Model_Export_Flow
      */
@@ -51,27 +51,27 @@ class Profileolabs_Lengow_Block_Export_Adminhtml_Process extends Mage_Adminhtml_
         $storeId = $this->getRequest()->getParam('store',0);
         $this->_flowModel->setStoreId($storeId);
         $flowItemsCount =  $this->_flowModel->getProductCollection()->getSize();
-		
+        
         
         
         $this->_flowModel->setException(Mage::helper("dataflow")->__("%d produits trouvés.(en stock + hors stock)",$flowItemsCount));
         $soldOutTxt = "";
         if(!$this->_flowModel->getConfig()->isExportSoldout())
         {
-        	$soldOutTxt = Mage::helper('profileolabs_lengow')->__('Seuls les produits en stock seront exportés');
-        	$this->_flowModel->setException($soldOutTxt);
+            $soldOutTxt = Mage::helper('profileolabs_lengow')->__('Seuls les produits en stock seront exportés');
+            $this->_flowModel->setException($soldOutTxt);
         }
 
         $numberOfRecords = $this->_flowModel->getCollectionByOffset(1)->count();
         $this->setNumberOfRecords($numberOfRecords);
         $this->setShowFinished(false);
-    	$offsets = ceil((int)$flowItemsCount/ $this->_flowModel->getLimit());	
-    	if($offsets == 0)
-    		$offsets =1;
-		
-    	$this->_flowModel->setException(Mage::helper("dataflow")->__("La génération se fera en %d lot(s) de %d produit(s)",$offsets,$this->_flowModel->getLimit()));
-    		
-    	$this->setFlowItemsCount( $flowItemsCount);
+        $offsets = ceil((int)$flowItemsCount/ $this->_flowModel->getLimit());    
+        if($offsets == 0)
+            $offsets =1;
+        
+        $this->_flowModel->setException(Mage::helper("dataflow")->__("La génération se fera en %d lot(s) de %d produit(s)",$offsets,$this->_flowModel->getLimit()));
+            
+        $this->setFlowItemsCount( $flowItemsCount);
         $this->setFlowConfig(
                     array(
                         'styles' => array(
@@ -98,13 +98,13 @@ class Profileolabs_Lengow_Block_Export_Adminhtml_Process extends Mage_Adminhtml_
 
                 for($i=1;$i<=$offsets;$i++)
                 {
-                	$nbProducts =  $this->_flowModel->getLimit();
-                	if($i==$offsets)
-                		$nbProducts =  $this->_flowModel->getCollectionByOffset($i)->count();
-                	
-	                $importData[] = array("offset"=>$i,"nbProducts"=>$nbProducts,"store"=>$this->getRequest()->getParam('store'));
+                    $nbProducts =  $this->_flowModel->getLimit();
+                    if($i==$offsets)
+                        $nbProducts =  $this->_flowModel->getCollectionByOffset($i)->count();
+                    
+                    $importData[] = array("offset"=>$i,"nbProducts"=>$nbProducts,"store"=>$this->getRequest()->getParam('store'));
                 }
-                	
+                    
                 $this->setImportData($importData);
         
         $this->_flowModelPrepared = true;
@@ -113,11 +113,11 @@ class Profileolabs_Lengow_Block_Export_Adminhtml_Process extends Mage_Adminhtml_
     
     public function getExceptions()
     {
-    	return $this->getFlowModel()->getExceptions();
+        return $this->getFlowModel()->getExceptions();
     }
-	
-	
-	
+    
+    
+    
   /**
      * Generating form key
      * @return string
@@ -138,7 +138,7 @@ class Profileolabs_Lengow_Block_Export_Adminhtml_Process extends Mage_Adminhtml_
         );
     }
     
-	/**
+    /**
      * Encoding to JSON
      * @param string $source
      * @return string JSON

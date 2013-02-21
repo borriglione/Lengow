@@ -9,22 +9,22 @@ class Profileolabs_Lengow_Model_Export_Xmlflow
     
     public function __construct()
     {
-    	$backendAttributes = array(
-    			'cache_dir'                 => Mage::getBaseDir('cache'),
-    			'hashed_directory_level'    => 1,
-    			'hashed_directory_umask'    => 0777,
-    			'file_name_prefix'          => 'mage',
-    	);
+        $backendAttributes = array(
+                'cache_dir'                 => Mage::getBaseDir('cache'),
+                'hashed_directory_level'    => 1,
+                'hashed_directory_umask'    => 0777,
+                'file_name_prefix'          => 'mage',
+        );
     }
     
     public function getMemoryManager()
     {
-    	if(is_null($this->_memoryManager))
-    	{
-    		$this->_memoryManager = Zend_Memory::factory('File',$this->_backendCacheAttributes);
-    	}
-    	 
-    	return $this->_memoryManager;
+        if(is_null($this->_memoryManager))
+        {
+            $this->_memoryManager = Zend_Memory::factory('File',$this->_backendCacheAttributes);
+        }
+         
+        return $this->_memoryManager;
     }
     
     public function _addEntries($entries)
@@ -47,7 +47,7 @@ class Profileolabs_Lengow_Model_Export_Xmlflow
     
     public function getVersion()
     {
-    	return Mage::getConfig()->getModuleConfig("Profileolabs_Lengow")->version;
+        return Mage::getConfig()->getModuleConfig("Profileolabs_Lengow")->version;
     }
     
     public function createXml()
@@ -99,37 +99,37 @@ class Profileolabs_Lengow_Model_Export_Xmlflow
                 foreach ($this->_xmlArray as $entry)
                 {
                     foreach($entry AS $key => $val) {
-                    	if(!in_array($key,$tab_entete))
-                    	{
-                    		$tab_entete[] = $key;
-                    	}
+                        if(!in_array($key,$tab_entete))
+                        {
+                            $tab_entete[] = $key;
+                        }
                     }
                 }
                 //mise en forme
-				foreach($tab_entete as $key => $val)
-				{
-					$csvFlowHead .= '"'.$this->cleanHeader($val).'"'."|";
-				}
-				$csvFlowHead = substr($csvFlowHead, 0, -1);
+                foreach($tab_entete as $key => $val)
+                {
+                    $csvFlowHead .= '"'.$this->cleanHeader($val).'"'."|";
+                }
+                $csvFlowHead = substr($csvFlowHead, 0, -1);
                 //infos produits
                 foreach ($this->_xmlArray as $entry)
                 {
                     $csvFlowProd = '';
                     foreach($tab_entete AS $key => $val) {
-                    	//echo $entry[$val]."<br>";
-                    	if(isset($entry[$val]))
-                    	{
-                    		$csvFlowProd .= '"'.$this->cleanLine($entry[$val]).'"|';
-                    	}
-                    	else
-                    	{
-                    		$csvFlowProd .= '""|';
-                    	}
+                        //echo $entry[$val]."<br>";
+                        if(isset($entry[$val]))
+                        {
+                            $csvFlowProd .= '"'.$this->cleanLine($entry[$val]).'"|';
+                        }
+                        else
+                        {
+                            $csvFlowProd .= '""|';
+                        }
                     }
                     $csvFlow .= substr($csvFlowProd,0,-1).chr(10);
                  }
                 
-				$csvFlow = $csvFlowHead.chr(10).$csvFlow;
+                $csvFlow = $csvFlowHead.chr(10).$csvFlow;
 
                 return $csvFlow;
 
@@ -140,60 +140,60 @@ class Profileolabs_Lengow_Model_Export_Xmlflow
     
     public function showVersion()
     {
-    	echo  'ModuleVersion='.$this->getVersion().'<br/> MageVersion='.Mage::getVersion();
+        echo  'ModuleVersion='.$this->getVersion().'<br/> MageVersion='.Mage::getVersion();
     }
 
    
     
     public function extractData($nameNode,$attributeCode,$product)
     {
-    	
-    		$_helper = Mage::helper('catalog/output');
-    	
-    		$data = $product->getData($attributeCode);
-			
-			$attribute = $product->getResource()->getAttribute($attributeCode);
-			if($attribute)
-			{				
-				$data = $attribute->getFrontend()->getValue($product);
-				$data = $_helper->productAttribute($product, $data, $attributeCode);
-				
-				if($nameNode == 'ecotaxe' && $attribute->getFrontendInput() == 'weee')
-				{
-					$weeeAttributes = Mage::getSingleton('weee/tax')->getProductWeeeAttributes($product);
-					
-					foreach ($weeeAttributes as $wa)
-					{
-						if($wa->getCode() == $attributeCode)
-						{
-							$data = round($wa->getAmount(),2);
-							break;
-						}
-					}				
-				}
-			}
-			
-			//$_helper = Mage::helper('catalog/output');
-			//if($nameNode == 'description' || $nameNode == 'short_description')
-				//$data = $_helper->productAttribute($product, $data, $attributeCode);	
-			
-			//Synthetize it
-			/*$method = "get".ucfirst($attributeCode);
-			if(method_exists($product,$method))
-				$data = $product->$method();*/
+        
+            $_helper = Mage::helper('catalog/output');
+        
+            $data = $product->getData($attributeCode);
+            
+            $attribute = $product->getResource()->getAttribute($attributeCode);
+            if($attribute)
+            {                
+                $data = $attribute->getFrontend()->getValue($product);
+                $data = $_helper->productAttribute($product, $data, $attributeCode);
+                
+                if($nameNode == 'ecotaxe' && $attribute->getFrontendInput() == 'weee')
+                {
+                    $weeeAttributes = Mage::getSingleton('weee/tax')->getProductWeeeAttributes($product);
+                    
+                    foreach ($weeeAttributes as $wa)
+                    {
+                        if($wa->getCode() == $attributeCode)
+                        {
+                            $data = round($wa->getAmount(),2);
+                            break;
+                        }
+                    }                
+                }
+            }
+            
+            //$_helper = Mage::helper('catalog/output');
+            //if($nameNode == 'description' || $nameNode == 'short_description')
+                //$data = $_helper->productAttribute($product, $data, $attributeCode);    
+            
+            //Synthetize it
+            /*$method = "get".ucfirst($attributeCode);
+            if(method_exists($product,$method))
+                $data = $product->$method();*/
 
-			//TODO remove this
-			if($data== "No" || $data == "Non")
-				$data = "";	
+            //TODO remove this
+            if($data== "No" || $data == "Non")
+                $data = "";    
 
-			//Exceptions data
-			if($nameNode == 'shipping_delay' && empty($data))
-				$data = $this->getConfig()->getConfigData('default_shipping_delay');
-			
-			if($nameNode == 'quantity')
-				$data = round($data);
-			
-			return $data;
+            //Exceptions data
+            if($nameNode == 'shipping_delay' && empty($data))
+                $data = $this->getConfig()->getConfigData('default_shipping_delay');
+            
+            if($nameNode == 'quantity')
+                $data = round($data);
+            
+            return $data;
     }
     
      /**
@@ -202,59 +202,59 @@ class Profileolabs_Lengow_Model_Export_Xmlflow
      */
     public function getConfig()
     {
-    	return Mage::getSingleton('profileolabs_lengow/export_config');
+        return Mage::getSingleton('profileolabs_lengow/export_config');
     }
     
     protected function arrayToNode($entry)
     {
-    	$node = "";
-    	foreach ($entry as $key=>$value) {
+        $node = "";
+        foreach ($entry as $key=>$value) {
 
 
-    		if(is_array($value))
-    		{
-    			if(is_string($key))
-    				$node.= $this->getNode($key, $this->arrayToNode($value),0);
-    			elseif(is_string(($subKey =current($value))))
-    				$node.= $this->getNode($subKey, $this->arrayToNode($value),0);
-    			else
-    				$node.= $this->arrayToNode($value);
-    		}
-    		else 
-    			$node .= $this->getNode($key, $value);
-    	}
-    	
-    	if($this->useZendMemory())
-    		return $this->getMemoryManager()->create($node)->getRef();
-    	
-    	return $node;
+            if(is_array($value))
+            {
+                if(is_string($key))
+                    $node.= $this->getNode($key, $this->arrayToNode($value),0);
+                elseif(is_string(($subKey =current($value))))
+                    $node.= $this->getNode($subKey, $this->arrayToNode($value),0);
+                else
+                    $node.= $this->arrayToNode($value);
+            }
+            else 
+                $node .= $this->getNode($key, $value);
+        }
+        
+        if($this->useZendMemory())
+            return $this->getMemoryManager()->create($node)->getRef();
+        
+        return $node;
     }
     
     protected function useZendMemory()
     {
-    	return false;
+        return false;
     }
     
     protected function getNode($name,$value,$withCDATA = 1)
-	{
-		$value = $this->getHelper()->cleanNotUtf8($value);
-		$openCDATA = "";
-		$closeCDATA = "";
-		if($withCDATA)
-		{
-			$openCDATA = "<![CDATA[";
-			$closeCDATA = "]]>";
-		}
-		return "<{$name}>{$openCDATA}{$value}{$closeCDATA}</{$name}>".chr(10);
-	}
-	
-	/**
+    {
+        $value = $this->getHelper()->cleanNotUtf8($value);
+        $openCDATA = "";
+        $closeCDATA = "";
+        if($withCDATA)
+        {
+            $openCDATA = "<![CDATA[";
+            $closeCDATA = "]]>";
+        }
+        return "<{$name}>{$openCDATA}{$value}{$closeCDATA}</{$name}>".chr(10);
+    }
+    
+    /**
      * Return Lengow Helper
      * @return Profileolabs_Lengow_Helper_Data
      */
     protected function getHelper()
     {
-    	return Mage::helper('profileolabs_lengow');
+        return Mage::helper('profileolabs_lengow');
     }
     
     

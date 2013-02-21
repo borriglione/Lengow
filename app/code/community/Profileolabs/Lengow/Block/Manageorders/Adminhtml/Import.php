@@ -3,9 +3,9 @@ class Profileolabs_Lengow_Block_Manageorders_Adminhtml_Import extends Mage_Admin
 {
 
     
-	public function getImportOrdersUrl()
+    public function getImportOrdersUrl()
     {
-    	return $this->getUrl('*/*/importOrders');
+        return $this->getUrl('*/*/importOrders');
     }
 
     

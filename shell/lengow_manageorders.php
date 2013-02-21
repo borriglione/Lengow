@@ -7,13 +7,13 @@ Mage::getConfig()->init();
 
 
 try {
-	set_time_limit(0);
-	Mage::getModel('profileolabs_lengow/manageorders_order')->manageOrders();
+    set_time_limit(0);
+    Mage::getModel('profileolabs_lengow/manageorders_order')->manageOrders();
 
 
 } catch (Exception $e) {
 
-	Mage::printException($e);
+    Mage::printException($e);
 }
 
 

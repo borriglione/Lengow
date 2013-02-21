@@ -27,7 +27,7 @@ class Profileolabs_Lengow_Model_Manageorders_Payment_Method_Purchaseorder extend
         return $this;
     }
     
-	/**
+    /**
      * Check whether payment method can be used
      * TODO: payment method instance is not supposed to know about quote
      * @param Mage_Sales_Model_Quote
@@ -36,8 +36,8 @@ class Profileolabs_Lengow_Model_Manageorders_Payment_Method_Purchaseorder extend
     public function isAvailable($quote = null)
     {
         if(Mage::getSingleton('checkout/session')->getIsLengow())
-        	return true;
-        	
+            return true;
+            
         return parent::isAvailable($quote);
     }
 }

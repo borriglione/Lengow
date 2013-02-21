@@ -54,22 +54,22 @@ class Profileolabs_Lengow_Model_Manageorders_Shipping_Carrier_Lengow
     */
     public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request)
     {
-    	if(Mage::getVersion() == '1.4.1.0')
-    	return $this->isActive();
-    	 
-    	return parent::proccessAdditionalValidation($request);
+        if(Mage::getVersion() == '1.4.1.0')
+        return $this->isActive();
+         
+        return parent::proccessAdditionalValidation($request);
     }
     
     public function getSession()
     {
-    	return Mage::getSingleton('checkout/session');
+        return Mage::getSingleton('checkout/session');
     }
     
-	public function isActive()
+    public function isActive()
     {
        if($this->getSession()->getIsLengow())
-       	return true;
-       	
+           return true;
+           
        return false;
     }
 

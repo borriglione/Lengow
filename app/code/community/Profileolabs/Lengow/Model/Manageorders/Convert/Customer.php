@@ -8,8 +8,8 @@
 class Profileolabs_Lengow_Model_Manageorders_Convert_Customer extends Varien_Object
 {
 
-	
-	/**
+    
+    /**
      * Convert xml node to customer model
      *
      * @param   array $data
@@ -17,30 +17,30 @@ class Profileolabs_Lengow_Model_Manageorders_Convert_Customer extends Varien_Obj
      */
     public function toCustomer(array $data, $customer=null)
     {
-    	/* @var $customer Mage_Customer_Model_Customer */
+        /* @var $customer Mage_Customer_Model_Customer */
         if (!($customer instanceof Mage_Customer_Model_Customer)) {
             $customer = Mage::getModel('customer/customer')->setWebsiteId(Mage::app()->getDefaultStoreView()->getWebsiteId())
-            												->loadByEmail($data['Email']);
+                                                            ->loadByEmail($data['Email']);
             $customer->setImportMode(true);
             
             if(!$customer->getId())
             {
-            	$customer->setWebsiteId(Mage::app()->getDefaultStoreView()->getWebsiteId());
-            	$customer->setConfirmation(null);
-            	$customer->setForceConfirmed(true);
-            	$customer->setPasswordHash($customer->hashPassword($customer->generatePassword(8)));
-            	$customer->setFromLengow(1);
+                $customer->setWebsiteId(Mage::app()->getDefaultStoreView()->getWebsiteId());
+                $customer->setConfirmation(null);
+                $customer->setForceConfirmed(true);
+                $customer->setPasswordHash($customer->hashPassword($customer->generatePassword(8)));
+                $customer->setFromLengow(1);
             }
         }
         
          Mage::helper('core')->copyFieldset('lengow_convert_customer', 'to_customer', $data, $customer);
         if($customer->getFirstname() == "")
-        	$customer->setFirstname('__');
-        	
+            $customer->setFirstname('__');
+            
         return $customer;
     }
     
-	/**
+    /**
      * Convert xml node to customer address model
      *
      * @param   array $data
@@ -48,10 +48,10 @@ class Profileolabs_Lengow_Model_Manageorders_Convert_Customer extends Varien_Obj
      */
     public function addresstoCustomer(array $data, $customer = null,$type='billing')
     {
-    	/* @var $customer Mage_Customer_Model_Customer */
+        /* @var $customer Mage_Customer_Model_Customer */
         if (!($customer instanceof Mage_Customer_Model_Customer)) {
 
-        	$customer = $this->toCustomer($data);
+            $customer = $this->toCustomer($data);
         }
         
          /* @var $address Mage_Customer_Model_Address */
@@ -61,32 +61,32 @@ class Profileolabs_Lengow_Model_Manageorders_Convert_Customer extends Varien_Obj
          $address->setIsDefaultShipping(false);
          if($type == "shipping")
          {
-         	$address->setIsDefaultBilling(false);
-         	$address->setIsDefaultShipping(true);
+             $address->setIsDefaultBilling(false);
+             $address->setIsDefaultShipping(true);
          }
         
         Mage::helper('core')->copyFieldset('lengow_convert_customer', 'to_customer_address', $data, $address);
-		
+        
         if($address->getFirstname() == "")
-        	$address->setFirstname(' __ ');
+            $address->setFirstname(' __ ');
         
         if(strpos(strtolower($address->getCountryId()),'france') !== false)
-        	$address->setCountryId('FR');
-        	
+            $address->setCountryId('FR');
+            
         $codeRegion = substr(str_pad($address->getPostcode(),5,"0",STR_PAD_LEFT),0,2);
 
         //$regionId = Mage::getModel('directory/region')->loadByCode($codeRegion,$address->getCountry())->getId();
         $regionId = Mage::getModel('directory/region')->getCollection()
-        												->addRegionCodeFilter($codeRegion)
-        												->addCountryFilter($address->getCountry())
-        												->getFirstItem()
-        												->getId();
+                                                        ->addRegionCodeFilter($codeRegion)
+                                                        ->addCountryFilter($address->getCountry())
+                                                        ->getFirstItem()
+                                                        ->getId();
    
         if($regionId)
-        	$address->setRegionId($regionId);
+            $address->setRegionId($regionId);
         else
-        	$address->setRegionId(182); //Ain pour le pays FR
-        	
+            $address->setRegionId(182); //Ain pour le pays FR
+            
         
         
         return $address;
