@@ -221,7 +221,7 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
         foreach($data as $k => $d)
         {
             //Si le champs est potentiellement convertible en valeur
-            if(is_numeric($d) && strpos($k, '_id') < 1 && strpos(' '.$k, 'price') == 0 && false === is_null($product->getAttribute($k)))
+            if(is_numeric($d) && strpos($k, '_id') < 1 && strpos(' '.$k, 'price') == 0 && false != $product->getResource()->getAttribute($k))
             {
                 //Convertion de l'id en valeur
                 if(!is_array($d) && !is_object($d) && $product->getAttributeText($k) != '')
@@ -229,8 +229,9 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
                 else
                     $_data[$k] = $d;
             }
-            else
+            else {
                 $_data[$k] = $d;
+            }
         }
         unset($data);
 
