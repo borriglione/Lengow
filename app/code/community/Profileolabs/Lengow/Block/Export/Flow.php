@@ -140,6 +140,7 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
             $_arr = array_merge($_arr, $this->_getCategories($product));
             $_arr = array_merge($_arr, $this->_getPrices($data));
             $_arr = array_merge($_arr, $this->_getShippingInfo($product));
+            $_arr = array_merge($_arr, $this->_getConfigurableAttributes($product));
 
             //Images, gestion de la fusion parent / enfant
             if($this->_configModel->getAny('donnees', 'parentsimages') && $parent !== false)
@@ -613,5 +614,44 @@ class Profileolabs_Lengow_Block_Export_Flow extends Mage_Core_Block_Template
         $from = $this->datep($from);
         $from = strtotime($from);
         return $from;
+    }
+    
+    protected function _getConfigurableAttributes($product)
+    {
+        $data = array();
+        
+        $data['product_type'] = "";
+        $data['product_variation'] = "";
+        $data['parentID'] = "";
+        
+        if($product->getTypeId() == "configurable")
+        {
+            $data['product_type'] = "parent";
+            $data['parentID'] = "";
+            $data['parentSKU'] = "";
+            $data['product_variation'] = $this->getConfigurableAttributes($product);
+        } elseif ($product->getTypeId() == "simple") {
+            $data['product_type'] = "child";
+            
+            $parentIds = Mage::getResourceSingleton('catalog/product_type_configurable')->getParentIdsByChild($product->getId());
+            if(count($parentIds)) {
+                $data['parentID'] = $parentIds[0];
+                $parentProduct = Mage::getModel("catalog/product")->load($parentIds[0]);
+                
+                $data['parentSKU'] = $parentProduct->getSku();
+                $data['product_variation'] = $this->getConfigurableAttributes($parentProduct);
+            }
+        }
+        return $data;
+    }
+    
+    protected function getConfigurableAttributes($product)
+    {
+        $attributeCodes = array();
+        $_attributes = $product->getTypeInstance(true)->getConfigurableAttributes($product);
+        foreach($_attributes as $_attribute) {
+            $attributeCodes[] = $_attribute->getProductAttribute()->getAttributeCode();
+        }
+        return implode(",", $attributeCodes);
     }
 }
