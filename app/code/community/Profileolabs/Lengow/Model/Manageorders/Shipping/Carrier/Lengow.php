@@ -23,7 +23,7 @@ class Profileolabs_Lengow_Model_Manageorders_Shipping_Carrier_Lengow
      */
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
-        if (!$this->isActive()) {
+        if (false === $this->isActive() || false === Mage::app()->getStore()->isAdmin()) {
             return false;
         }
 
@@ -67,9 +67,9 @@ class Profileolabs_Lengow_Model_Manageorders_Shipping_Carrier_Lengow
     
     public function isActive()
     {
-       if($this->getSession()->getIsLengow())
+       if ($this->getSession()->getIsLengow() && true === Mage::app()->getStore()->isAdmin()) {
            return true;
-           
+       }
        return false;
     }
 
