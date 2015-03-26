@@ -1,0 +1,11 @@
+{
+  "name": "profileolabs/lengow",
+  "license": ["OSL-3.0"],
+  "type": "magento-module",
+  "description": "Lengow Module",
+  "homepage": "https://github.com/magento-hackathon/mage-git-info",
+  "authors":[{
+    "name": "Andre Herrn",
+    "email": "developer@andre-herrn.de"
+  }]
+}
